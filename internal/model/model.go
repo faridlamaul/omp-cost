@@ -232,3 +232,25 @@ func (m MultiProfileReport) OverallCacheHitRate() float64 {
 	}
 	return (float64(m.TotalCache) / float64(denom)) * 100.0
 }
+
+func (m MultiProfileReport) DateRangeString() string {
+	var minTs int64 = 0
+	var maxTs int64 = 0
+	for _, p := range m.Profiles {
+		if p.MinTimestamp > 0 && (minTs == 0 || p.MinTimestamp < minTs) {
+			minTs = p.MinTimestamp
+		}
+		if p.MaxTimestamp > maxTs {
+			maxTs = p.MaxTimestamp
+		}
+	}
+	if minTs > 0 && maxTs > 0 {
+		tStart := time.UnixMilli(minTs).Local()
+		tEnd := time.UnixMilli(maxTs).Local()
+		return fmt.Sprintf("%s (%s – %s)", tStart.Format("January 2006"), tStart.Format("02 Jan"), tEnd.Format("02 Jan 2006"))
+	}
+	if t, err := time.Parse("2006-01", m.Month); err == nil {
+		return t.Format("January 2006")
+	}
+	return m.Month
+}

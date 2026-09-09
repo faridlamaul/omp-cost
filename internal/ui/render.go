@@ -2,12 +2,10 @@ package ui
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/faridlamaul/omp-cost/internal/model"
-	"golang.org/x/term"
 )
 
 // RenderFlags controls which additional analytical views to render.
@@ -22,24 +20,16 @@ type RenderFlags struct {
 	BudgetCap    float64
 }
 
-// GetTerminalWidth returns current terminal columns or a fallback.
+const StandardTableWidth = 117
+
+// GetTerminalWidth returns the standard table width.
 func GetTerminalWidth() int {
-	w, _, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil || w <= 0 {
-		return 108
-	}
-	if w < 80 {
-		return 80
-	}
-	return w
+	return StandardTableWidth
 }
 
 // RenderMultiProfileReport displays the combined overview across all profiles.
 func RenderMultiProfileReport(report *model.MultiProfileReport, flags RenderFlags) {
-	w := GetTerminalWidth()
-	if w > 118 {
-		w = 118
-	}
+	w := StandardTableWidth
 
 	// 1. Header Card
 	title := StyleHeaderTitle.Render("⚡ OH MY PI") + " " + StyleDim.Render("— Multi-Profile Cost & Usage Report")
@@ -47,12 +37,11 @@ func RenderMultiProfileReport(report *model.MultiProfileReport, flags RenderFlag
 		StyleSecondary.Render("Profiles:"),
 		lipgloss.NewStyle().Foreground(ColorSky).Render(fmt.Sprintf("All (%d)", len(report.Profiles))),
 		StyleSecondary.Render("Period:"),
-		lipgloss.NewStyle().Foreground(ColorYellow).Render(report.Month),
+		lipgloss.NewStyle().Foreground(ColorYellow).Render(report.DateRangeString()),
 	)
 
 	headerCard := StyleCard.Width(w - 2).Render(fmt.Sprintf("%s\n%s", title, meta))
 	fmt.Println(headerCard)
-
 	// 2. KPI Cards
 	renderKPICards(
 		[]KPIItem{
@@ -84,10 +73,7 @@ func RenderMultiProfileReport(report *model.MultiProfileReport, flags RenderFlag
 
 // RenderProfileSummary renders an individual profile's detailed report.
 func RenderProfileSummary(summary *model.ProfileSummary, flags RenderFlags, isSubView bool) {
-	w := GetTerminalWidth()
-	if w > 118 {
-		w = 118
-	}
+	w := StandardTableWidth
 
 	if !isSubView {
 		title := StyleHeaderTitle.Render("⚡ OH MY PI") + " " + StyleDim.Render(fmt.Sprintf("— Profile Detail: %s", summary.Profile))
@@ -99,7 +85,6 @@ func RenderProfileSummary(summary *model.ProfileSummary, flags RenderFlags, isSu
 
 		headerCard := StyleCard.Width(w - 2).Render(fmt.Sprintf("%s\n%s", title, meta))
 		fmt.Println(headerCard)
-
 		renderKPICards(
 			[]KPIItem{
 				{Title: "TOTAL COST", Value: FormatCost(summary.Cost), Style: StyleCost},
@@ -158,16 +143,20 @@ func renderKPICards(items []KPIItem, totalW int) {
 	if len(items) == 0 {
 		return
 	}
-	cardW := (totalW - (len(items) * 2)) / len(items)
-	var rendered []string
+	cardW1 := totalW / 3
+	cardW2 := totalW / 3
+	cardW3 := totalW - cardW1 - cardW2
+	cardWidths := []int{cardW1, cardW2, cardW3}
 
-	for _, item := range items {
+	var rendered []string
+	for i, item := range items {
 		titleText := StyleDim.Render(item.Title)
 		valText := item.Style.Render(item.Value)
 		card := lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(ColorLine).
-			Width(cardW).
+			Padding(0, 1).
+			Width(cardWidths[i] - 2).
 			Render(fmt.Sprintf("%s\n%s", titleText, valText))
 		rendered = append(rendered, card)
 	}
@@ -235,12 +224,12 @@ func renderProfilesSummaryTable(profiles []*model.ProfileSummary, grandTotal flo
 		width int
 		align lipgloss.Position
 	}{
-		{"Profile", 20, lipgloss.Left},
-		{"Requests", 10, lipgloss.Right},
-		{"In / Out Tokens", 16, lipgloss.Right},
-		{"Cache Hit", 11, lipgloss.Right},
-		{"Cost ($)", 12, lipgloss.Right},
-		{"Share", 16, lipgloss.Right},
+		{"Profile", 24, lipgloss.Left},
+		{"Requests", 11, lipgloss.Right},
+		{"In / Out Tokens", 18, lipgloss.Right},
+		{"Cache Hit", 13, lipgloss.Right},
+		{"Cost ($)", 14, lipgloss.Right},
+		{"Share", 18, lipgloss.Right},
 	}
 
 	// Table borders
@@ -439,7 +428,7 @@ func RenderProjectAttributionTable(projects []*model.ProjectCost, grandCost floa
 		width int
 		align lipgloss.Position
 	}{
-		{"Workspace / Repository", 36, lipgloss.Left},
+		{"Workspace / Repository", 51, lipgloss.Left},
 		{"Requests", 10, lipgloss.Right},
 		{"Tokens", 12, lipgloss.Right},
 		{"Cost ($)", 12, lipgloss.Right},
@@ -485,7 +474,7 @@ func RenderAgentAttributionTable(agents []*model.AgentTypeCost, grandCost float6
 		width int
 		align lipgloss.Position
 	}{
-		{"Agent Role", 24, lipgloss.Left},
+		{"Agent Role", 49, lipgloss.Left},
 		{"Requests", 10, lipgloss.Right},
 		{"Tokens", 14, lipgloss.Right},
 		{"Cost ($)", 12, lipgloss.Right},
@@ -541,7 +530,7 @@ func RenderPerformanceBenchmarkTable(models []*model.ModelCost, totalW int) {
 		width int
 		align lipgloss.Position
 	}{
-		{"Provider / Model", 38, lipgloss.Left},
+		{"Provider / Model", 53, lipgloss.Left},
 		{"Requests", 9, lipgloss.Right},
 		{"Avg TTFT", 12, lipgloss.Right},
 		{"Avg Latency", 13, lipgloss.Right},
@@ -593,13 +582,13 @@ func RenderDailyBreakdownTable(days []*model.DailyCost, grandCost float64, total
 		width int
 		align lipgloss.Position
 	}{
-		{"Date", 12, lipgloss.Left},
-		{"Day", 6, lipgloss.Left},
-		{"Requests", 9, lipgloss.Right},
-		{"In / Out Tokens", 16, lipgloss.Right},
-		{"Cache Hit", 11, lipgloss.Right},
-		{"Cost ($)", 12, lipgloss.Right},
-		{"Share", 16, lipgloss.Right},
+		{"Date", 14, lipgloss.Left},
+		{"Day", 8, lipgloss.Left},
+		{"Requests", 11, lipgloss.Right},
+		{"In / Out Tokens", 18, lipgloss.Right},
+		{"Cache Hit", 13, lipgloss.Right},
+		{"Cost ($)", 14, lipgloss.Right},
+		{"Share", 17, lipgloss.Right},
 	}
 
 	var b strings.Builder
@@ -651,13 +640,13 @@ func RenderWeeklyBreakdownTable(weeks []*model.WeeklyCost, grandCost float64, to
 		width int
 		align lipgloss.Position
 	}{
-		{"Week", 12, lipgloss.Left},
+		{"Week", 14, lipgloss.Left},
 		{"Date Range", 18, lipgloss.Left},
-		{"Requests", 9, lipgloss.Right},
+		{"Requests", 10, lipgloss.Right},
 		{"In / Out Tokens", 16, lipgloss.Right},
 		{"Cache Hit", 11, lipgloss.Right},
-		{"Cost ($)", 12, lipgloss.Right},
-		{"Share", 16, lipgloss.Right},
+		{"Cost ($)", 13, lipgloss.Right},
+		{"Share", 13, lipgloss.Right},
 	}
 
 	var b strings.Builder
