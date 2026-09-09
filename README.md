@@ -4,6 +4,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CGO Free](https://img.shields.io/badge/CGO-Free-brightgreen.svg)]()
 
+<p align="center">
+  <img src="assets/preview.svg" alt="omp-cost terminal preview" width="850">
+</p>
+
 A fast, modern terminal utility and FinOps tool for inspecting AI token usage, prompt caching efficiency, and costs across **Oh My Pi** profiles by calendar month.
 
 Built with **Go**, **Lipgloss**, **Cobra**, and **pure Go SQLite** (`modernc.org/sqlite` — 100% CGO-free).
@@ -27,13 +31,17 @@ Built with **Go**, **Lipgloss**, **Cobra**, and **pure Go SQLite** (`modernc.org
 
 ## 🚀 Installation
 
+### One-Line Install (Recommended)
+```bash
+curl -fsSL https://raw.githubusercontent.com/faridlamaul/omp-cost/main/install.sh | bash
+```
+
 ### From Source
 ```bash
 git clone https://github.com/faridlamaul/omp-cost.git
 cd omp-cost
 make install
 ```
-This builds and copies the binary to `~/.local/bin/omp-cost`. Make sure `~/.local/bin` is in your `$PATH`.
 
 ### Via `go install`
 ```bash
@@ -75,6 +83,9 @@ omp-cost work --weekly
 omp-cost work today
 omp-cost work yesterday
 omp-cost work 2026-09-09
+
+# 9. Launch interactive full-screen TUI dashboard
+omp-cost -i
 ```
 
 ---
@@ -139,6 +150,25 @@ omp-cost work --forecast --budget 300
 
 ---
 
+### 🎮 Interactive Mode (`-i`)
+
+Launch an interactive, keyboard-driven full-screen TUI dashboard powered by **Bubbletea**:
+
+```bash
+omp-cost -i
+```
+
+| Key | Action |
+|---|---|
+| `◀` / `▶` or `h` / `l` | Navigate between previous/next calendar months |
+| `[` / `]` | Switch active profile (`all`, `work`, `personal`, etc.) |
+| `Tab` or `1`–`5` | Switch view tabs (`Models`, `Daily`, `Weekly`, `Projects`, `Performance`) |
+| `▲` / `▼` or `j` / `k` | Scroll content up and down |
+| `r` | Reload and refresh data |
+| `q` / `Esc` | Exit interactive mode |
+
+---
+
 ### Exporting Data
 
 ```bash
@@ -164,6 +194,7 @@ omp-cost -o md
 | `--profile <name>` | `-p` | Target profile explicitly |
 | `--month <val>` | `-m` | Target calendar month (`YYYY-MM` or `all`) |
 | `--all-profiles` | `-a` | Show aggregated overview across all profiles |
+| `--interactive` | `-i` | Launch interactive full-screen TUI dashboard |
 | `--daily` | `-d` | Show day-by-day cost and token breakdown |
 | `--weekly` | `-w` | Show week-by-week cost and token breakdown |
 | `--by-project` | | Show cost attribution by repository / workspace folder |

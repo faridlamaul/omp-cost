@@ -1,0 +1,207 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 720" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #181825; }
+      .window-bg { fill: #1e1e2e; }
+      .bar-bg { fill: #181825; }
+      .text-default { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; font-size: 13px; fill: #cdd6f4; }
+      .bold { font-weight: bold; }
+      .dim { fill: #6c7086; }
+      .blue { fill: #89b4fa; }
+      .mauve { fill: #cba6f7; }
+      .green { fill: #a6e3a1; }
+      .yellow { fill: #f9e2af; }
+      .peach { fill: #fab387; }
+      .sky { fill: #89dceb; }
+      .red { fill: #f38ba8; }
+      .subtext { fill: #a6adc8; }
+      .line { fill: #585b70; }
+    </style>
+  </defs>
+
+  <!-- Window Container -->
+  <rect width="980" height="720" rx="14" class="window-bg" stroke="#313244" stroke-width="2"/>
+
+  <!-- macOS Window Header -->
+  <path d="M 0 14 C 0 6.268 6.268 0 14 0 L 966 0 C 973.732 0 980 6.268 980 14 L 980 38 L 0 38 Z" class="bar-bg" />
+  <circle cx="22" cy="19" r="6" fill="#f38ba8" />
+  <circle cx="42" cy="19" r="6" fill="#f9e2af" />
+  <circle cx="62" cy="19" r="6" fill="#a6e3a1" />
+  <text x="490" y="24" text-anchor="middle" class="text-default dim" font-size="12">omp-cost — zsh — 980x720</text>
+
+  <!-- Terminal Content -->
+  <g transform="translate(30, 65)">
+    <!-- Command Prompt -->
+    <text x="0" y="0" class="text-default"><tspan class="green bold">➜</tspan> <tspan class="sky bold">~</tspan> <tspan class="bold">omp-cost</tspan></text>
+
+    <!-- Header Card -->
+    <g transform="translate(0, 18)">
+      <rect width="920" height="52" rx="6" fill="#181825" stroke="#585b70" stroke-width="1.2"/>
+      <text x="18" y="24" class="text-default bold blue">⚡ OH MY PI <tspan class="dim" font-weight="normal">— Multi-Profile Cost &amp; Usage Report</tspan></text>
+      <text x="18" y="42" class="text-default subtext">Profiles: <tspan class="sky bold">All (4)</tspan>   •   Period: <tspan class="yellow bold">September 2026</tspan></text>
+    </g>
+
+    <!-- Top KPI Cards -->
+    <g transform="translate(0, 80)">
+      <!-- Card 1 -->
+      <g transform="translate(0, 0)">
+        <rect width="298" height="52" rx="6" fill="#181825" stroke="#585b70" stroke-width="1.2"/>
+        <text x="16" y="22" class="text-default dim" font-size="11">COMBINED TOTAL COST</text>
+        <text x="16" y="42" class="text-default bold green" font-size="16">$324.09</text>
+      </g>
+      <!-- Card 2 -->
+      <g transform="translate(311, 0)">
+        <rect width="298" height="52" rx="6" fill="#181825" stroke="#585b70" stroke-width="1.2"/>
+        <text x="16" y="22" class="text-default dim" font-size="11">TOTAL REQUESTS</text>
+        <text x="16" y="42" class="text-default bold" font-size="16">4,793 <tspan class="dim" font-size="12">reqs</tspan></text>
+      </g>
+      <!-- Card 3 -->
+      <g transform="translate(622, 0)">
+        <rect width="298" height="52" rx="6" fill="#181825" stroke="#585b70" stroke-width="1.2"/>
+        <text x="16" y="22" class="text-default dim" font-size="11">OVERALL CACHE HIT</text>
+        <text x="16" y="42" class="text-default bold sky" font-size="16">96.7% <tspan class="dim" font-size="12">(616.87M tok)</tspan></text>
+      </g>
+    </g>
+
+    <!-- Savings Banner -->
+    <g transform="translate(0, 142)">
+      <rect width="920" height="34" rx="6" fill="#181825" stroke="#a6e3a1" stroke-width="1.2"/>
+      <text x="16" y="22" class="text-default">💰 <tspan class="subtext">Net Spend:</tspan> <tspan class="green bold">$324.09</tspan>   •   🛡️ <tspan class="subtext">Without Cache:</tspan> <tspan class="yellow bold">$1,579.43</tspan>   •   🎉 <tspan class="subtext">Dollar Saved:</tspan> <tspan class="sky bold">$1,255.34</tspan> <tspan class="green">(79.5% discount via caching)</tspan></text>
+    </g>
+
+    <!-- Profiles Table -->
+    <g transform="translate(0, 190)">
+      <rect width="920" height="135" rx="6" fill="#181825" stroke="#585b70" stroke-width="1.2"/>
+      <!-- Header -->
+      <line x1="0" y1="28" x2="920" y2="28" stroke="#585b70" stroke-width="1.2"/>
+      <text x="18" y="20" class="text-default bold">Profile</text>
+      <text x="320" y="20" class="text-default bold" text-anchor="end">Requests</text>
+      <text x="500" y="20" class="text-default bold" text-anchor="end">In / Out Tokens</text>
+      <text x="630" y="20" class="text-default bold" text-anchor="end">Cache Hit</text>
+      <text x="760" y="20" class="text-default bold" text-anchor="end">Cost ($)</text>
+      <text x="890" y="20" class="text-default bold" text-anchor="end">Share</text>
+
+      <!-- Row 1: work -->
+      <text x="18" y="48" class="text-default bold sky">work</text>
+      <text x="320" y="48" class="text-default" text-anchor="end">4,284</text>
+      <text x="500" y="48" class="text-default subtext" text-anchor="end">19.47M / 2.74M</text>
+      <text x="630" y="48" class="text-default green" text-anchor="end">96.6%</text>
+      <text x="760" y="48" class="text-default bold green" text-anchor="end">$249.92</text>
+      <text x="890" y="48" class="text-default" text-anchor="end"><tspan class="green">████░░</tspan> 77.1%</text>
+
+      <!-- Row 2: personal -->
+      <text x="18" y="74" class="text-default bold sky">personal</text>
+      <text x="320" y="74" class="text-default" text-anchor="end">509</text>
+      <text x="500" y="74" class="text-default subtext" text-anchor="end">1.36M / 150.4K</text>
+      <text x="630" y="74" class="text-default green" text-anchor="end">97.8%</text>
+      <text x="760" y="74" class="text-default bold green" text-anchor="end">$74.17</text>
+      <text x="890" y="74" class="text-default" text-anchor="end"><tspan class="green">█░░░░░</tspan> 22.9%</text>
+
+      <!-- Row 3: default -->
+      <text x="18" y="98" class="text-default dim">default</text>
+      <text x="320" y="98" class="text-default dim" text-anchor="end">0</text>
+      <text x="500" y="98" class="text-default dim" text-anchor="end">-</text>
+      <text x="630" y="98" class="text-default dim" text-anchor="end">-</text>
+      <text x="760" y="98" class="text-default dim" text-anchor="end">$0.00</text>
+      <text x="890" y="98" class="text-default dim" text-anchor="end">0.0%</text>
+
+      <!-- Grand Total Row -->
+      <line x1="0" y1="108" x2="920" y2="108" stroke="#585b70" stroke-width="1.8"/>
+      <text x="18" y="126" class="text-default bold peach">★ ALL PROFILES</text>
+      <text x="320" y="126" class="text-default bold" text-anchor="end">4,793</text>
+      <text x="500" y="126" class="text-default bold" text-anchor="end">20.83M / 2.89M</text>
+      <text x="630" y="126" class="text-default bold sky" text-anchor="end">96.7%</text>
+      <text x="760" y="126" class="text-default bold green" text-anchor="end">$324.09</text>
+      <text x="890" y="126" class="text-default bold green" text-anchor="end"><tspan class="green">██████</tspan> 100.0%</text>
+    </g>
+
+    <!-- Profile Detail Title -->
+    <g transform="translate(0, 342)">
+      <text x="0" y="0" class="text-default bold mauve">▶ Profile: work <tspan class="green bold">$249.92</tspan> <tspan class="dim" font-weight="normal">(4,284 reqs)</tspan></text>
+    </g>
+
+    <!-- Detailed Models Table -->
+    <g transform="translate(0, 355)">
+      <rect width="920" height="270" rx="6" fill="#181825" stroke="#585b70" stroke-width="1.2"/>
+      <line x1="0" y1="28" x2="920" y2="28" stroke="#585b70" stroke-width="1.2"/>
+      <text x="18" y="20" class="text-default bold">Provider</text>
+      <text x="210" y="20" class="text-default bold">Model</text>
+      <text x="430" y="20" class="text-default bold" text-anchor="end">Reqs</text>
+      <text x="580" y="20" class="text-default bold" text-anchor="end">In / Out</text>
+      <text x="690" y="20" class="text-default bold" text-anchor="end">Cache Hit</text>
+      <text x="790" y="20" class="text-default bold" text-anchor="end">Cost ($)</text>
+      <text x="895" y="20" class="text-default bold" text-anchor="end">Share</text>
+
+      <!-- Anthropic Group -->
+      <text x="18" y="50" class="text-default bold mauve">anthropic</text>
+      <text x="210" y="50" class="text-default sky">claude-opus-5</text>
+      <text x="430" y="50" class="text-default" text-anchor="end">981</text>
+      <text x="580" y="50" class="text-default subtext" text-anchor="end">2.0K / 838.7K</text>
+      <text x="690" y="50" class="text-default green" text-anchor="end">100.0%</text>
+      <text x="790" y="50" class="text-default bold" text-anchor="end">$141.83</text>
+      <text x="895" y="50" class="text-default" text-anchor="end"><tspan class="green">███░░░</tspan> 56.8%</text>
+
+      <text x="210" y="74" class="text-default sky">claude-haiku-4-5</text>
+      <text x="430" y="74" class="text-default" text-anchor="end">326</text>
+      <text x="580" y="74" class="text-default subtext" text-anchor="end">2.7K / 221.3K</text>
+      <text x="690" y="74" class="text-default green" text-anchor="end">100.0%</text>
+      <text x="790" y="74" class="text-default bold" text-anchor="end">$4.86</text>
+      <text x="895" y="74" class="text-default" text-anchor="end"><tspan class="green">░░░░░░</tspan>  1.9%</text>
+
+      <!-- Subtotal Anthropic -->
+      <line x1="0" y1="84" x2="920" y2="84" stroke="#585b70" stroke-width="1"/>
+      <text x="210" y="102" class="text-default dim">❯ Subtotal</text>
+      <text x="430" y="102" class="text-default dim" text-anchor="end">1,307</text>
+      <text x="580" y="102" class="text-default dim" text-anchor="end">4.6K / 1.06M</text>
+      <text x="690" y="102" class="text-default dim" text-anchor="end">100.0%</text>
+      <text x="790" y="102" class="text-default bold yellow" text-anchor="end">$146.68</text>
+      <text x="895" y="102" class="text-default yellow bold" text-anchor="end"><tspan class="green">███░░░</tspan> 58.7%</text>
+      <line x1="0" y1="112" x2="920" y2="112" stroke="#585b70" stroke-width="1"/>
+
+      <!-- OpenAI Codex Group -->
+      <text x="18" y="132" class="text-default bold mauve">openai-codex</text>
+      <text x="210" y="132" class="text-default sky">gpt-5.6-sol</text>
+      <text x="430" y="132" class="text-default" text-anchor="end">815</text>
+      <text x="580" y="132" class="text-default subtext" text-anchor="end">4.08M / 432.8K</text>
+      <text x="690" y="132" class="text-default green" text-anchor="end">94.5%</text>
+      <text x="790" y="132" class="text-default bold" text-anchor="end">$52.90</text>
+      <text x="895" y="132" class="text-default" text-anchor="end"><tspan class="green">█░░░░░</tspan> 21.2%</text>
+
+      <text x="210" y="156" class="text-default sky">gpt-5.6-terra</text>
+      <text x="430" y="156" class="text-default" text-anchor="end">716</text>
+      <text x="580" y="156" class="text-default subtext" text-anchor="end">2.98M / 300.0K</text>
+      <text x="690" y="156" class="text-default green" text-anchor="end">96.4%</text>
+      <text x="790" y="156" class="text-default bold" text-anchor="end">$25.72</text>
+      <text x="895" y="156" class="text-default" text-anchor="end"><tspan class="green">░░░░░░</tspan> 10.3%</text>
+
+      <!-- Subtotal OpenAI -->
+      <line x1="0" y1="166" x2="920" y2="166" stroke="#585b70" stroke-width="1"/>
+      <text x="210" y="184" class="text-default dim">❯ Subtotal</text>
+      <text x="430" y="184" class="text-default dim" text-anchor="end">1,968</text>
+      <text x="580" y="184" class="text-default dim" text-anchor="end">8.55M / 973.4K</text>
+      <text x="690" y="184" class="text-default dim" text-anchor="end">95.9%</text>
+      <text x="790" y="184" class="text-default bold yellow" text-anchor="end">$80.16</text>
+      <text x="895" y="184" class="text-default yellow bold" text-anchor="end"><tspan class="green">█░░░░░</tspan> 32.1%</text>
+      <line x1="0" y1="194" x2="920" y2="194" stroke="#585b70" stroke-width="1"/>
+
+      <!-- Google Group -->
+      <text x="18" y="214" class="text-default bold mauve">google-cloud</text>
+      <text x="210" y="214" class="text-default sky">gemini-3.8-flash</text>
+      <text x="430" y="214" class="text-default" text-anchor="end">989</text>
+      <text x="580" y="214" class="text-default subtext" text-anchor="end">10.91M / 555.7K</text>
+      <text x="690" y="214" class="text-default green" text-anchor="end">94.0%</text>
+      <text x="790" y="214" class="text-default bold" text-anchor="end">$23.07</text>
+      <text x="895" y="214" class="text-default" text-anchor="end"><tspan class="green">░░░░░░</tspan>  9.2%</text>
+
+      <!-- Total Row -->
+      <line x1="0" y1="234" x2="920" y2="234" stroke="#585b70" stroke-width="1.8"/>
+      <text x="18" y="254" class="text-default bold peach">★ TOTAL</text>
+      <text x="210" y="254" class="text-default bold">ALL MODELS (8)</text>
+      <text x="430" y="254" class="text-default bold" text-anchor="end">4,284</text>
+      <text x="580" y="254" class="text-default bold" text-anchor="end">19.47M / 2.74M</text>
+      <text x="690" y="254" class="text-default bold sky" text-anchor="end">96.6%</text>
+      <text x="790" y="254" class="text-default bold green" text-anchor="end">$249.92</text>
+      <text x="895" y="254" class="text-default bold green" text-anchor="end"><tspan class="green">██████</tspan> 100.0%</text>
+    </g>
+  </g>
+</svg>

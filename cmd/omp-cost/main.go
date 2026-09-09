@@ -34,6 +34,7 @@ var (
 	flagList        bool
 	flagDaily       bool
 	flagWeekly      bool
+	flagInteractive bool
 	flagVersion     bool
 )
 
@@ -94,6 +95,7 @@ broken down by calendar month for individual profiles or all profiles.`,
 	rootCmd.Flags().BoolVarP(&flagDaily, "daily", "d", false, "Show day-by-day cost and token breakdown")
 	rootCmd.Flags().BoolVarP(&flagWeekly, "weekly", "w", false, "Show week-by-week cost and token breakdown")
 	rootCmd.Flags().BoolVarP(&flagList, "list", "l", false, "List all discovered profiles and database paths")
+	rootCmd.Flags().BoolVarP(&flagInteractive, "interactive", "i", false, "Launch interactive full-screen TUI dashboard")
 	rootCmd.Flags().BoolVarP(&flagVersion, "version", "v", false, "Print version information")
 
 	if err := rootCmd.Execute(); err != nil {
@@ -186,6 +188,10 @@ func runRoot(cmd *cobra.Command, args []string) error {
 	outputFmt := strings.ToLower(flagOutput)
 	if flagJSON {
 		outputFmt = "json"
+	}
+
+	if flagInteractive {
+		return ui.RunInteractive(reader, allProfiles, targetProfile, targetMonth)
 	}
 
 	renderFlags := ui.RenderFlags{
