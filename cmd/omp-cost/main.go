@@ -32,6 +32,8 @@ var (
 	flagSync        bool
 	flagNoSync      bool
 	flagList        bool
+	flagDaily       bool
+	flagWeekly      bool
 	flagVersion     bool
 )
 
@@ -89,6 +91,8 @@ broken down by calendar month for individual profiles or all profiles.`,
 	rootCmd.Flags().Float64Var(&flagBudget, "budget", 0.0, "Set monthly budget cap for forecast alert")
 	rootCmd.Flags().BoolVar(&flagSync, "sync", false, "Force sync sessions from omp transcripts before querying")
 	rootCmd.Flags().BoolVar(&flagNoSync, "no-sync", false, "Skip background session sync for ultra-fast query (<15ms)")
+	rootCmd.Flags().BoolVarP(&flagDaily, "daily", "d", false, "Show day-by-day cost and token breakdown")
+	rootCmd.Flags().BoolVarP(&flagWeekly, "weekly", "w", false, "Show week-by-week cost and token breakdown")
 	rootCmd.Flags().BoolVarP(&flagList, "list", "l", false, "List all discovered profiles and database paths")
 	rootCmd.Flags().BoolVarP(&flagVersion, "version", "v", false, "Print version information")
 
@@ -121,13 +125,21 @@ func runRoot(cmd *cobra.Command, args []string) error {
 	}
 
 	monthRegex := regexp.MustCompile(`^\d{4}-\d{2}$`)
+	dayRegex := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
 
 	// Resolve positional arguments flexibly
 	targetProfile := flagProfile
 	targetMonth := flagMonth
 
 	for _, arg := range args {
-		if monthRegex.MatchString(arg) {
+		low := strings.ToLower(arg)
+		if low == "today" {
+			targetMonth = time.Now().Format("2006-01-02")
+		} else if low == "yesterday" {
+			targetMonth = time.Now().AddDate(0, 0, -1).Format("2006-01-02")
+		} else if dayRegex.MatchString(arg) {
+			targetMonth = arg
+		} else if monthRegex.MatchString(arg) {
 			if targetMonth == "" {
 				targetMonth = arg
 			}
@@ -180,6 +192,8 @@ func runRoot(cmd *cobra.Command, args []string) error {
 		ShowProjects: flagByProject,
 		ShowAgents:   flagByAgent,
 		ShowPerf:     flagPerf,
+		ShowDaily:    flagDaily,
+		ShowWeekly:   flagWeekly,
 		ShowSavings:  flagSavings,
 		ShowForecast: flagForecast,
 		BudgetCap:    flagBudget,
@@ -374,7 +388,15 @@ func outputReport(report *model.MultiProfileReport, fmtType string, flags ui.Ren
 		}
 		fmt.Println(s)
 	case "csv":
-		s, err := export.ToCSV(report.Profiles)
+		var s string
+		var err error
+		if flags.ShowDaily {
+			s, err = export.ToDailyCSV(report.Profiles)
+		} else if flags.ShowWeekly {
+			s, err = export.ToWeeklyCSV(report.Profiles)
+		} else {
+			s, err = export.ToCSV(report.Profiles)
+		}
 		if err != nil {
 			return err
 		}

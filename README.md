@@ -64,6 +64,17 @@ omp-cost 2026-08
 
 # 5. Full monthly history for a specific profile
 omp-cost hermes all
+
+# 6. View daily breakdown for the current month
+omp-cost hermes --daily
+
+# 7. View weekly breakdown
+omp-cost hermes --weekly
+
+# 8. Filter for a specific day (today, yesterday, or YYYY-MM-DD)
+omp-cost hermes today
+omp-cost hermes yesterday
+omp-cost hermes 2026-09-09
 ```
 
 ---
@@ -153,8 +164,9 @@ omp-cost -o md
 | `--profile <name>` | `-p` | Target profile explicitly |
 | `--month <val>` | `-m` | Target calendar month (`YYYY-MM` or `all`) |
 | `--all-profiles` | `-a` | Show aggregated overview across all profiles |
+| `--daily` | `-d` | Show day-by-day cost and token breakdown |
+| `--weekly` | `-w` | Show week-by-week cost and token breakdown |
 | `--by-project` | | Show cost attribution by repository / workspace folder |
-| `--by-agent` | | Show cost attribution by agent architecture |
 | `--perf` | | Show latency (TTFT, duration) and throughput benchmarks |
 | `--savings` | | Display prompt cache ROI and dollar savings banner |
 | `--forecast` | | Calculate daily burn-rate and projected month-end spend |

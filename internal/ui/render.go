@@ -17,6 +17,8 @@ type RenderFlags struct {
 	ShowPerf     bool
 	ShowSavings  bool
 	ShowForecast bool
+	ShowDaily    bool
+	ShowWeekly   bool
 	BudgetCap    float64
 }
 
@@ -136,6 +138,12 @@ func RenderProfileSummary(summary *model.ProfileSummary, flags RenderFlags, isSu
 			allModels = append(allModels, p.Models...)
 		}
 		RenderPerformanceBenchmarkTable(allModels, w)
+	}
+	if flags.ShowDaily && len(summary.Days) > 0 {
+		RenderDailyBreakdownTable(summary.Days, summary.Cost, w)
+	}
+	if flags.ShowWeekly && len(summary.Weeks) > 0 {
+		RenderWeeklyBreakdownTable(summary.Weeks, summary.Cost, w)
 	}
 }
 
@@ -567,6 +575,122 @@ func RenderPerformanceBenchmarkTable(models []*model.ModelCost, totalW int) {
 			lipgloss.NewStyle().Width(cols[2].width).Align(cols[2].align).Render(lipgloss.NewStyle().Foreground(ColorSky).Render(ttftStr)),
 			lipgloss.NewStyle().Width(cols[3].width).Align(cols[3].align).Render(StyleSecondary.Render(latStr)),
 			lipgloss.NewStyle().Width(cols[4].width).Align(cols[4].align).Render(lipgloss.NewStyle().Bold(true).Foreground(ColorGreen).Render(tpsStr)),
+		}
+		b.WriteString(renderTableRow(cells))
+		b.WriteString("\n")
+	}
+	b.WriteString(renderTableBorder("└", "┴", "┘", cols))
+	fmt.Println(b.String())
+	fmt.Println()
+}
+
+// RenderDailyBreakdownTable renders day-by-day cost and token breakdown.
+func RenderDailyBreakdownTable(days []*model.DailyCost, grandCost float64, totalW int) {
+	fmt.Println(lipgloss.NewStyle().Bold(true).Foreground(ColorSky).Render("📅 Daily Cost & Usage Breakdown (--daily)"))
+
+	cols := []struct {
+		name  string
+		width int
+		align lipgloss.Position
+	}{
+		{"Date", 12, lipgloss.Left},
+		{"Day", 6, lipgloss.Left},
+		{"Requests", 9, lipgloss.Right},
+		{"In / Out Tokens", 16, lipgloss.Right},
+		{"Cache Hit", 11, lipgloss.Right},
+		{"Cost ($)", 12, lipgloss.Right},
+		{"Share", 16, lipgloss.Right},
+	}
+
+	var b strings.Builder
+	b.WriteString(renderTableBorder("┌", "┬", "┐", cols))
+	b.WriteString("\n")
+
+	var hCells []string
+	for _, c := range cols {
+		hCells = append(hCells, lipgloss.NewStyle().Width(c.width).Align(c.align).Render(StyleTableHeader.Render(c.name)))
+	}
+	b.WriteString(renderTableRow(hCells))
+	b.WriteString("\n")
+	b.WriteString(renderTableBorder("├", "┼", "┤", cols))
+	b.WriteString("\n")
+
+	for _, d := range days {
+		bar := MakeProgressBar(d.SharePct, 6)
+		cHit := fmt.Sprintf("%.1f%%", d.CacheHitRate())
+		cStyle := StyleSecondary
+		if d.CacheHitRate() >= 90.0 {
+			cStyle = lipgloss.NewStyle().Foreground(ColorGreen)
+		} else if d.CacheHitRate() > 0 {
+			cStyle = lipgloss.NewStyle().Foreground(ColorYellow)
+		}
+
+		cells := []string{
+			lipgloss.NewStyle().Width(cols[0].width).Align(cols[0].align).Render(lipgloss.NewStyle().Bold(true).Foreground(ColorSky).Render(d.Date)),
+			lipgloss.NewStyle().Width(cols[1].width).Align(cols[1].align).Render(StyleSecondary.Render(d.DayOfWeek)),
+			lipgloss.NewStyle().Width(cols[2].width).Align(cols[2].align).Render(formatInt(d.Requests)),
+			lipgloss.NewStyle().Width(cols[3].width).Align(cols[3].align).Render(StyleSecondary.Render(fmt.Sprintf("%s/%s", FormatTokens(d.InputTokens), FormatTokens(d.OutputTokens)))),
+			lipgloss.NewStyle().Width(cols[4].width).Align(cols[4].align).Render(cStyle.Render(cHit)),
+			lipgloss.NewStyle().Width(cols[5].width).Align(cols[5].align).Render(StyleCost.Render(FormatCost(d.Cost))),
+			lipgloss.NewStyle().Width(cols[6].width).Align(cols[6].align).Render(fmt.Sprintf("%s %4.1f%%", bar, d.SharePct)),
+		}
+		b.WriteString(renderTableRow(cells))
+		b.WriteString("\n")
+	}
+	b.WriteString(renderTableBorder("└", "┴", "┘", cols))
+	fmt.Println(b.String())
+	fmt.Println()
+}
+
+// RenderWeeklyBreakdownTable renders week-by-week cost and token breakdown.
+func RenderWeeklyBreakdownTable(weeks []*model.WeeklyCost, grandCost float64, totalW int) {
+	fmt.Println(lipgloss.NewStyle().Bold(true).Foreground(ColorPeach).Render("📆 Weekly Cost & Usage Breakdown (--weekly)"))
+
+	cols := []struct {
+		name  string
+		width int
+		align lipgloss.Position
+	}{
+		{"Week", 12, lipgloss.Left},
+		{"Date Range", 18, lipgloss.Left},
+		{"Requests", 9, lipgloss.Right},
+		{"In / Out Tokens", 16, lipgloss.Right},
+		{"Cache Hit", 11, lipgloss.Right},
+		{"Cost ($)", 12, lipgloss.Right},
+		{"Share", 16, lipgloss.Right},
+	}
+
+	var b strings.Builder
+	b.WriteString(renderTableBorder("┌", "┬", "┐", cols))
+	b.WriteString("\n")
+
+	var hCells []string
+	for _, c := range cols {
+		hCells = append(hCells, lipgloss.NewStyle().Width(c.width).Align(c.align).Render(StyleTableHeader.Render(c.name)))
+	}
+	b.WriteString(renderTableRow(hCells))
+	b.WriteString("\n")
+	b.WriteString(renderTableBorder("├", "┼", "┤", cols))
+	b.WriteString("\n")
+
+	for _, wItem := range weeks {
+		bar := MakeProgressBar(wItem.SharePct, 6)
+		cHit := fmt.Sprintf("%.1f%%", wItem.CacheHitRate())
+		cStyle := StyleSecondary
+		if wItem.CacheHitRate() >= 90.0 {
+			cStyle = lipgloss.NewStyle().Foreground(ColorGreen)
+		} else if wItem.CacheHitRate() > 0 {
+			cStyle = lipgloss.NewStyle().Foreground(ColorYellow)
+		}
+
+		cells := []string{
+			lipgloss.NewStyle().Width(cols[0].width).Align(cols[0].align).Render(lipgloss.NewStyle().Bold(true).Foreground(ColorPeach).Render(wItem.Week)),
+			lipgloss.NewStyle().Width(cols[1].width).Align(cols[1].align).Render(StyleSecondary.Render(wItem.DateRange)),
+			lipgloss.NewStyle().Width(cols[2].width).Align(cols[2].align).Render(formatInt(wItem.Requests)),
+			lipgloss.NewStyle().Width(cols[3].width).Align(cols[3].align).Render(StyleSecondary.Render(fmt.Sprintf("%s/%s", FormatTokens(wItem.InputTokens), FormatTokens(wItem.OutputTokens)))),
+			lipgloss.NewStyle().Width(cols[4].width).Align(cols[4].align).Render(cStyle.Render(cHit)),
+			lipgloss.NewStyle().Width(cols[5].width).Align(cols[5].align).Render(StyleCost.Render(FormatCost(wItem.Cost))),
+			lipgloss.NewStyle().Width(cols[6].width).Align(cols[6].align).Render(fmt.Sprintf("%s %4.1f%%", bar, wItem.SharePct)),
 		}
 		b.WriteString(renderTableRow(cells))
 		b.WriteString("\n")

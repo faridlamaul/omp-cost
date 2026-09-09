@@ -95,6 +95,58 @@ type AgentTypeCost struct {
 	SharePct     float64 `json:"share_pct"`
 }
 
+// DailyCost holds aggregated usage statistics for a specific day.
+type DailyCost struct {
+	Date             string  `json:"date"`
+	DayOfWeek        string  `json:"day_of_week"`
+	Requests         int64   `json:"requests"`
+	InputTokens      int64   `json:"input_tokens"`
+	OutputTokens     int64   `json:"output_tokens"`
+	CacheReadTokens  int64   `json:"cache_read_tokens"`
+	CacheWriteTokens int64   `json:"cache_write_tokens"`
+	Cost             float64 `json:"cost"`
+	CostNoCache      float64 `json:"cost_no_cache"`
+	SharePct         float64 `json:"share_pct"`
+}
+
+func (d DailyCost) CacheTokens() int64 {
+	return d.CacheReadTokens + d.CacheWriteTokens
+}
+
+func (d DailyCost) CacheHitRate() float64 {
+	denom := d.CacheTokens() + d.InputTokens
+	if denom == 0 {
+		return 0.0
+	}
+	return (float64(d.CacheTokens()) / float64(denom)) * 100.0
+}
+
+// WeeklyCost holds aggregated usage statistics for a specific calendar week.
+type WeeklyCost struct {
+	Week             string  `json:"week"`
+	DateRange        string  `json:"date_range"`
+	Requests         int64   `json:"requests"`
+	InputTokens      int64   `json:"input_tokens"`
+	OutputTokens     int64   `json:"output_tokens"`
+	CacheReadTokens  int64   `json:"cache_read_tokens"`
+	CacheWriteTokens int64   `json:"cache_write_tokens"`
+	Cost             float64 `json:"cost"`
+	CostNoCache      float64 `json:"cost_no_cache"`
+	SharePct         float64 `json:"share_pct"`
+}
+
+func (w WeeklyCost) CacheTokens() int64 {
+	return w.CacheReadTokens + w.CacheWriteTokens
+}
+
+func (w WeeklyCost) CacheHitRate() float64 {
+	denom := w.CacheTokens() + w.InputTokens
+	if denom == 0 {
+		return 0.0
+	}
+	return (float64(w.CacheTokens()) / float64(denom)) * 100.0
+}
+
 // CacheSavings calculates the dollar value saved via prompt caching.
 type CacheSavings struct {
 	NetSpend        float64 `json:"net_spend"`
@@ -132,6 +184,8 @@ type ProfileSummary struct {
 	Providers       []*ProviderSubtotal `json:"providers,omitempty"`
 	Projects        []*ProjectCost      `json:"projects,omitempty"`
 	AgentTypes      []*AgentTypeCost    `json:"agent_types,omitempty"`
+	Days            []*DailyCost        `json:"days,omitempty"`
+	Weeks           []*WeeklyCost       `json:"weeks,omitempty"`
 	Savings         CacheSavings        `json:"savings"`
 	Forecast        BurnRateForecast    `json:"forecast"`
 }

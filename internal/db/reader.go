@@ -139,7 +139,11 @@ func (r *Reader) GetModelCosts(dbPath string, month string) ([]*model.ModelCost,
 	whereClause := ""
 	var args []interface{}
 	if month != "" && month != "all" {
-		whereClause = "WHERE strftime('%Y-%m', timestamp/1000, 'unixepoch', 'localtime') = ?"
+		if len(month) == 10 { // YYYY-MM-DD
+			whereClause = "WHERE strftime('%Y-%m-%d', timestamp/1000, 'unixepoch', 'localtime') = ?"
+		} else { // YYYY-MM
+			whereClause = "WHERE strftime('%Y-%m', timestamp/1000, 'unixepoch', 'localtime') = ?"
+		}
 		args = append(args, month)
 	}
 
@@ -311,6 +315,113 @@ func (r *Reader) GetAgentTypeCosts(dbPath string, month string) ([]*model.AgentT
 	return agentTypes, nil
 }
 
+// GetDailyCosts queries aggregated metrics per calendar day.
+func (r *Reader) GetDailyCosts(dbPath string, month string) ([]*model.DailyCost, error) {
+	conn, err := r.OpenDB(dbPath)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	whereClause := ""
+	var args []interface{}
+	if month != "" && month != "all" {
+		whereClause = "WHERE strftime('%Y-%m', timestamp/1000, 'unixepoch', 'localtime') = ?"
+		args = append(args, month)
+	}
+
+	query := fmt.Sprintf(`
+	SELECT 
+		strftime('%%Y-%%m-%%d', timestamp/1000, 'unixepoch', 'localtime') as day,
+		count(*) as reqs,
+		coalesce(sum(input_tokens), 0) as in_tok,
+		coalesce(sum(output_tokens), 0) as out_tok,
+		coalesce(sum(cache_read_tokens), 0) as cache_read_tok,
+		coalesce(sum(cache_write_tokens), 0) as cache_write_tok,
+		coalesce(sum(cost_total), 0) as cost,
+		coalesce(sum(cost_no_cache_input), 0) as cost_no_cache
+	FROM messages
+	%s
+	GROUP BY day
+	ORDER BY day DESC;
+	`, whereClause)
+
+	rows, err := conn.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var days []*model.DailyCost
+	for rows.Next() {
+		d := &model.DailyCost{}
+		if err := rows.Scan(&d.Date, &d.Requests, &d.InputTokens, &d.OutputTokens, &d.CacheReadTokens, &d.CacheWriteTokens, &d.Cost, &d.CostNoCache); err != nil {
+			continue
+		}
+		if t, err := time.Parse("2006-01-02", d.Date); err == nil {
+			d.DayOfWeek = t.Format("Mon")
+		}
+		days = append(days, d)
+	}
+	return days, nil
+}
+
+// GetWeeklyCosts queries aggregated metrics per calendar week.
+func (r *Reader) GetWeeklyCosts(dbPath string, month string) ([]*model.WeeklyCost, error) {
+	conn, err := r.OpenDB(dbPath)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	whereClause := ""
+	var args []interface{}
+	if month != "" && month != "all" {
+		whereClause = "WHERE strftime('%Y-%m', timestamp/1000, 'unixepoch', 'localtime') = ?"
+		args = append(args, month)
+	}
+
+	query := fmt.Sprintf(`
+	SELECT 
+		strftime('%%Y-W%%W', timestamp/1000, 'unixepoch', 'localtime') as week,
+		min(timestamp) as min_ts,
+		max(timestamp) as max_ts,
+		count(*) as reqs,
+		coalesce(sum(input_tokens), 0) as in_tok,
+		coalesce(sum(output_tokens), 0) as out_tok,
+		coalesce(sum(cache_read_tokens), 0) as cache_read_tok,
+		coalesce(sum(cache_write_tokens), 0) as cache_write_tok,
+		coalesce(sum(cost_total), 0) as cost,
+		coalesce(sum(cost_no_cache_input), 0) as cost_no_cache
+	FROM messages
+	%s
+	GROUP BY week
+	ORDER BY week DESC;
+	`, whereClause)
+
+	rows, err := conn.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var weeks []*model.WeeklyCost
+	for rows.Next() {
+		w := &model.WeeklyCost{}
+		var minTs, maxTs int64
+		if err := rows.Scan(&w.Week, &minTs, &maxTs, &w.Requests, &w.InputTokens, &w.OutputTokens, &w.CacheReadTokens, &w.CacheWriteTokens, &w.Cost, &w.CostNoCache); err != nil {
+			continue
+		}
+		if minTs > 0 && maxTs > 0 {
+			tStart := time.UnixMilli(minTs).Local()
+			tEnd := time.UnixMilli(maxTs).Local()
+			w.DateRange = fmt.Sprintf("%s – %s", tStart.Format("02 Jan"), tEnd.Format("02 Jan"))
+		}
+		weeks = append(weeks, w)
+	}
+	return weeks, nil
+}
+
 // formatFolderName cleans OMP folder names like "-Workspace-geniebook-agentic-ai" into cleaner paths.
 func formatFolderName(folder string) string {
 	if folder == "-tmp" || folder == "tmp" {
@@ -421,6 +532,24 @@ func (r *Reader) BuildProfileSummary(profileName, dbPath, month string, budgetCa
 		}
 	}
 	summary.AgentTypes = agentTypes
+
+	// Daily Costs
+	days, _ := r.GetDailyCosts(dbPath, month)
+	for _, d := range days {
+		if grandCost > 0 {
+			d.SharePct = (d.Cost / grandCost) * 100.0
+		}
+	}
+	summary.Days = days
+
+	// Weekly Costs
+	weeks, _ := r.GetWeeklyCosts(dbPath, month)
+	for _, w := range weeks {
+		if grandCost > 0 {
+			w.SharePct = (w.Cost / grandCost) * 100.0
+		}
+	}
+	summary.Weeks = weeks
 
 	// Cache Savings Calculation
 	estimatedNoCache := summary.CostNoCache
