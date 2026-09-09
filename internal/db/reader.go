@@ -422,7 +422,7 @@ func (r *Reader) GetWeeklyCosts(dbPath string, month string) ([]*model.WeeklyCos
 	return weeks, nil
 }
 
-// formatFolderName cleans OMP folder names like "-Workspace-geniebook-agentic-ai" into cleaner paths.
+// formatFolderName cleans OMP folder names like "-Workspace-myproject-api" into cleaner paths.
 func formatFolderName(folder string) string {
 	if folder == "-tmp" || folder == "tmp" {
 		return "tmp"

@@ -12,11 +12,11 @@ Built with **Go**, **Lipgloss**, **Cobra**, and **pure Go SQLite** (`modernc.org
 
 ## ✨ Features
 
-- **Multi-Profile Aggregation:** Automatically detects all Oh My Pi profiles (`hermes`, `germatech`, `default`, etc.) and displays a consolidated overview table alongside per-profile breakdowns.
+- **Multi-Profile Aggregation:** Automatically detects all Oh My Pi profiles (`work`, `personal`, `default`, etc.) and displays a consolidated overview table alongside per-profile breakdowns.
 - **True Calendar Month Filtering:** View costs by calendar month (e.g. `2026-09` from Sep 1 to current day, or full historical months like `2026-08`), replacing standard 30-day rolling windows.
 - **Provider Subtotals:** Clear subtotals for each provider (`Anthropic`, `OpenAI Codex`, `Google Antigravity`, etc.) with model sorting by spend.
 - **💰 Prompt Cache ROI Calculator (`--savings`):** Automatically computes dollar value saved via prompt caching and effective discount rate.
-- **📁 Workspace / Project Attribution (`--by-project`):** Groups token usage and costs by repository or folder (e.g. `sentinel`, `monolith`, `infra`).
+- **📁 Workspace / Project Attribution (`--by-project`):** Groups token usage and costs by repository or folder (e.g. `backend-api`, `frontend-web`, `infra-k8s`).
 - **🤖 Agent Architecture Attribution (`--by-agent`):** Breaks down spending across the Main Orchestrator, Parallel Subagents, and Background Advisors.
 - **⚡ Latency & Throughput Benchmark (`--perf`):** Evaluates average Time to First Token (TTFT), response duration, and output tokens/sec throughput per model.
 - **🔥 Daily Burn Rate & Month-End Forecast (`--forecast`, `--budget`):** Calculates your daily run-rate, projected month-end spend, and budget cap warnings.
@@ -51,30 +51,30 @@ go install github.com/faridlamaul/omp-cost/cmd/omp-cost@latest
 omp-cost
 
 # 2. Detailed breakdown for a specific profile
-omp-cost hermes
-omp-cost germatech
+omp-cost work
+omp-cost personal
 
 # 3. Specific profile for a specific month
-omp-cost hermes 2026-08
-omp-cost germatech 2026-09
+omp-cost work 2026-08
+omp-cost personal 2026-09
 
 # 4. Summary of all profiles on a specific month
 omp-cost all 2026-08
 omp-cost 2026-08
 
 # 5. Full monthly history for a specific profile
-omp-cost hermes all
+omp-cost work all
 
 # 6. View daily breakdown for the current month
-omp-cost hermes --daily
+omp-cost work --daily
 
 # 7. View weekly breakdown
-omp-cost hermes --weekly
+omp-cost work --weekly
 
 # 8. Filter for a specific day (today, yesterday, or YYYY-MM-DD)
-omp-cost hermes today
-omp-cost hermes yesterday
-omp-cost hermes 2026-09-09
+omp-cost work today
+omp-cost work yesterday
+omp-cost work 2026-09-09
 ```
 
 ---
@@ -83,22 +83,22 @@ omp-cost hermes 2026-09-09
 
 #### 1. Workspace / Repository Attribution (`--by-project`)
 ```bash
-omp-cost hermes --by-project
+omp-cost work --by-project
 ```
 ```text
 📁 Project / Workspace Cost Attribution (--by-project)
 ┌──────────────────────────────────────┬────────────┬──────────────┬──────────────┬──────────────────┐
 │ Workspace / Repository               │   Requests │       Tokens │     Cost ($) │            Share │
 ├──────────────────────────────────────┼────────────┼──────────────┼──────────────┼──────────────────┤
-│ geniebook                            │      1,959 │      244.53M │      $142.75 │     ███░░░ 57.4% │
-│ genie/sentinel                       │      2,101 │      306.54M │      $100.63 │     ██░░░░ 40.5% │
-│ tmp                                  │        125 │       13.58M │       $2.081 │     ░░░░░░  0.8% │
+│ backend-api                          │      1,959 │      244.53M │      $142.75 │     ███░░░ 57.4% │
+│ frontend-web                         │      2,101 │      306.54M │      $100.63 │     ██░░░░ 40.5% │
+│ infra-k8s                            │        125 │       13.58M │       $2.081 │     ░░░░░░  0.8% │
 └──────────────────────────────────────┴────────────┴──────────────┴──────────────┴──────────────────┘
 ```
 
 #### 2. Agent Architecture Attribution (`--by-agent`)
 ```bash
-omp-cost hermes --by-agent
+omp-cost work --by-agent
 ```
 ```text
 🤖 Agent Architecture Attribution (--by-agent)
@@ -113,7 +113,7 @@ omp-cost hermes --by-agent
 
 #### 3. Latency & Throughput Benchmark (`--perf`)
 ```bash
-omp-cost hermes --perf
+omp-cost work --perf
 ```
 ```text
 ⚡ Latency & Throughput Benchmark (--perf)
@@ -129,7 +129,7 @@ omp-cost hermes --perf
 
 #### 4. Daily Burn-Rate & Month-End Forecast (`--forecast`, `--budget`)
 ```bash
-omp-cost hermes --forecast --budget 300
+omp-cost work --forecast --budget 300
 ```
 ```text
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────╮
@@ -144,7 +144,7 @@ omp-cost hermes --forecast --budget 300
 ```bash
 # JSON export (pipeable to jq)
 omp-cost -o json
-omp-cost hermes 2026-09 --json | jq '.profiles[0].providers[]'
+omp-cost work 2026-09 --json | jq '.profiles[0].providers[]'
 
 # CSV export (spreadsheet friendly)
 omp-cost -o csv > usage_report.csv

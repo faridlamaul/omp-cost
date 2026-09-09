@@ -49,12 +49,12 @@ broken down by calendar month for individual profiles or all profiles.`,
   omp-cost
 
   # Detailed breakdown for a specific profile in current month:
-  omp-cost hermes
-  omp-cost germatech
+  omp-cost work
+  omp-cost personal
 
   # Detailed breakdown for a specific profile in a specific month:
-  omp-cost hermes 2026-08
-  omp-cost germatech 2026-09
+  omp-cost work 2026-08
+  omp-cost personal 2026-09
 
   # Breakdown by workspace repository or project:
   omp-cost --by-project
