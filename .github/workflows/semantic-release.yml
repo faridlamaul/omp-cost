@@ -1,0 +1,63 @@
+name: Semantic Release
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "README.md"
+      - "assets/**"
+      - "docs/**"
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump type"
+        type: choice
+        options:
+          - auto
+          - patch
+          - minor
+          - major
+        default: auto
+        required: true
+      dry_run:
+        description: "Dry-run (do not create tag/release)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  semantic-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Install go-gitops
+        run: |
+          go install github.com/faridlamaul/go-gitops/cmd/github@latest
+
+      - name: Run Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          BUMP="${{ inputs.bump || 'auto' }}"
+          ARGS="tag --repo=${GITHUB_REPOSITORY} --ref=${GITHUB_SHA} --bump=${BUMP}"
+
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="${ARGS} --dry-run"
+          fi
+
+          echo "Executing: go-gitops ${ARGS}"
+          go-gitops ${ARGS}
