@@ -1,27 +1,20 @@
 name: Release
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - "README.md"
-      - "assets/**"
-      - "docs/**"
   workflow_dispatch:
     inputs:
       bump:
         description: "Version bump type"
         type: choice
         options:
-          - auto
           - patch
           - minor
           - major
-        default: auto
+          - auto
+        default: patch
         required: true
       dry_run:
-        description: "Dry-run (do not create tag/release)"
+        description: "Dry-run (preview version without creating tag or release)"
         type: boolean
         default: false
 
@@ -29,19 +22,19 @@ permissions:
   contents: write
 
 jobs:
-  # 1. Automatic Semantic Versioning, Tagging, and Release Notes via go-gitops
+  # 1. Semantic Versioning, Tagging, and Release Notes via go-gitops
   semantic:
     uses: faridlamaul/ci-template/.github/workflows/semantic-release.yml@main
     with:
-      bump: ${{ inputs.bump || 'auto' }}
-      dry_run: ${{ inputs.dry_run || false }}
+      bump: ${{ inputs.bump }}
+      dry_run: ${{ inputs.dry_run }}
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
 
   # 2. Multi-platform Binary Compilation & Asset Upload via GoReleaser
   binary:
     needs: semantic
-    if: needs.semantic.outputs.released == 'true'
+    if: needs.semantic.outputs.released == 'true' && !inputs.dry_run
     uses: faridlamaul/ci-template/.github/workflows/go-release.yml@main
     with:
       version: ${{ needs.semantic.outputs.version }}
