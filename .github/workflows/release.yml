@@ -2,31 +2,48 @@ name: Release
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
+    paths-ignore:
+      - "README.md"
+      - "assets/**"
+      - "docs/**"
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump type"
+        type: choice
+        options:
+          - auto
+          - patch
+          - minor
+          - major
+        default: auto
+        required: true
+      dry_run:
+        description: "Dry-run (do not create tag/release)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
 
 jobs:
-  goreleaser:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  # 1. Automatic Semantic Versioning, Tagging, and Release Notes via go-gitops
+  semantic:
+    uses: faridlamaul/ci-template/.github/workflows/semantic-release.yml@main
+    with:
+      bump: ${{ inputs.bump || 'auto' }}
+      dry_run: ${{ inputs.dry_run || false }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "stable"
-
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
-        with:
-          distribution: goreleaser
-          version: "~> v2"
-          args: release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # 2. Multi-platform Binary Compilation & Asset Upload via GoReleaser
+  binary:
+    needs: semantic
+    if: needs.semantic.outputs.released == 'true'
+    uses: faridlamaul/ci-template/.github/workflows/go-release.yml@main
+    with:
+      version: ${{ needs.semantic.outputs.version }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
