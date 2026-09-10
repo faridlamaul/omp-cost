@@ -29,36 +29,10 @@ permissions:
   contents: write
 
 jobs:
-  semantic-release:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Pull go-gitops container image
-        run: |
-          docker pull ghcr.io/faridlamaul/go-gitops:latest
-
-      - name: Run Semantic Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SHA: ${{ github.sha }}
-        run: |
-          BUMP="${{ inputs.bump || 'auto' }}"
-          ARGS="tag --repo=${GITHUB_REPOSITORY} --ref=${GITHUB_SHA} --bump=${BUMP}"
-
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            ARGS="${ARGS} --dry-run"
-          fi
-
-          echo "Executing go-gitops container with: ${ARGS}"
-          docker run --rm \
-            -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
-            -e GITHUB_REPOSITORY="${GITHUB_REPOSITORY}" \
-            -e GITHUB_SHA="${GITHUB_SHA}" \
-            -v "${GITHUB_WORKSPACE}:/workspace" \
-            -w /workspace \
-            ghcr.io/faridlamaul/go-gitops:latest ${ARGS}
+  release:
+    uses: faridlamaul/ci-template/.github/workflows/semantic-release.yml@main
+    with:
+      bump: ${{ inputs.bump || 'auto' }}
+      dry_run: ${{ inputs.dry_run || false }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
