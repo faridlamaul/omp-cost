@@ -38,8 +38,12 @@ esac
 
 mkdir -p "${INSTALL_DIR}"
 
-# 1. Try to download pre-built GitHub Release binary if available
-LATEST_TAG=$(curl -s "https://api.github.com/repos/${REPO}/releases/latest" 2>/dev/null | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' || true)
+# 1. Resolve latest release tag without hitting GitHub API rate limits
+LATEST_TAG=$(basename "$(curl -fsSL -o /dev/null -w '%{url_effective}' "https://github.com/${REPO}/releases/latest" 2>/dev/null || true)")
+if [ "${LATEST_TAG}" = "releases" ] || [ "${LATEST_TAG}" = "latest" ] || [ -z "${LATEST_TAG}" ]; then
+  # Fallback to API if redirect failed
+  LATEST_TAG=$(curl -s "https://api.github.com/repos/${REPO}/releases/latest" 2>/dev/null | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' || true)
+fi
 DOWNLOADED=false
 
 if [ -n "${LATEST_TAG}" ]; then
@@ -66,7 +70,7 @@ if [ "${DOWNLOADED}" = false ]; then
     TMP_SRC=$(mktemp -d)
     git clone --depth 1 "https://github.com/${REPO}.git" "${TMP_SRC}" 2>/dev/null || true
     if [ -d "${TMP_SRC}" ] && [ -f "${TMP_SRC}/cmd/omp-cost/main.go" ]; then
-      (cd "${TMP_SRC}" && go build -ldflags="-s -w" -o "${INSTALL_DIR}/${BINARY}" ./cmd/omp-cost)
+      (cd "${TMP_SRC}" && go build -ldflags="-s -w -X main.version=${LATEST_TAG:-dev}" -o "${INSTALL_DIR}/${BINARY}" ./cmd/omp-cost)
       chmod +x "${INSTALL_DIR}/${BINARY}"
       DOWNLOADED=true
     fi
