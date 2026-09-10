@@ -25,6 +25,8 @@ func NewReader() *Reader {
 }
 
 // DiscoverProfiles scans ~/.omp for available profiles with stats.db files.
+// If the default profile directory (~/.omp) exists, it is always registered
+// so that initial session sync can populate stats.db on first run.
 func (r *Reader) DiscoverProfiles() map[string]string {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -34,14 +36,23 @@ func (r *Reader) DiscoverProfiles() map[string]string {
 	profiles := make(map[string]string)
 	resolvedPaths := make(map[string]bool)
 
+	ompDir := filepath.Join(home, ".omp")
+	defDB := filepath.Join(ompDir, "stats.db")
+
 	// 1. Default profile at ~/.omp/stats.db
-	defDB := filepath.Join(home, ".omp", "stats.db")
-	if fi, err := os.Stat(defDB); err == nil && !fi.IsDir() {
+	// If ~/.omp directory exists, register "default" profile so sync can create stats.db on first run
+	if fi, err := os.Stat(ompDir); err == nil && fi.IsDir() {
 		realPath, err := filepath.EvalSymlinks(defDB)
 		if err == nil {
 			profiles["default"] = defDB
 			resolvedPaths[realPath] = true
+		} else {
+			profiles["default"] = defDB
+			resolvedPaths[defDB] = true
 		}
+	} else if fi, err := os.Stat(defDB); err == nil && !fi.IsDir() {
+		profiles["default"] = defDB
+		resolvedPaths[defDB] = true
 	}
 
 	// 2. Named profiles under ~/.omp/profiles/*/stats.db
@@ -53,15 +64,14 @@ func (r *Reader) DiscoverProfiles() map[string]string {
 				continue
 			}
 			dbCandidate := filepath.Join(profilesDir, entry.Name(), "stats.db")
-			if fi, err := os.Stat(dbCandidate); err == nil && !fi.IsDir() {
-				realPath, err := filepath.EvalSymlinks(dbCandidate)
-				if err == nil {
-					// Avoid adding duplicate real files under different alias names
-					if !resolvedPaths[realPath] {
-						profiles[entry.Name()] = dbCandidate
-						resolvedPaths[realPath] = true
-					}
-				}
+			realPath, err := filepath.EvalSymlinks(dbCandidate)
+			target := dbCandidate
+			if err == nil {
+				target = realPath
+			}
+			if !resolvedPaths[target] {
+				profiles[entry.Name()] = dbCandidate
+				resolvedPaths[target] = true
 			}
 		}
 	}
