@@ -1,12 +1,13 @@
 BINARY_NAME=omp-cost
 INSTALL_DIR=$(HOME)/.local/bin
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 
 .PHONY: all build install test clean
 
 all: build
 
 build:
-	go build -ldflags="-s -w" -o bin/$(BINARY_NAME) ./cmd/omp-cost
+	go build -ldflags="-s -w -X main.version=$(VERSION)" -o bin/$(BINARY_NAME) ./cmd/omp-cost
 
 install: build
 	mkdir -p $(INSTALL_DIR)
