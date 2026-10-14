@@ -110,57 +110,28 @@ func (m *InteractiveModel) loadData() {
 	currentMonth := m.months[m.selectedMonthIdx]
 	currentProfile := m.profileNames[m.selectedProfileIdx]
 
-	report := &model.MultiProfileReport{
-		Month: currentMonth,
-	}
+	var profiles []*model.ProfileSummary
 
 	if currentProfile == "all" {
 		for _, name := range m.profileNames[1:] {
 			dbPath := m.allProfiles[name]
 			summary, err := m.reader.BuildProfileSummary(name, dbPath, currentMonth, 0)
 			if err == nil && summary != nil {
-				report.Profiles = append(report.Profiles, summary)
-				report.TotalRequests += summary.Requests
-				report.TotalInput += summary.InputTokens
-				report.TotalOutput += summary.OutputTokens
-				report.TotalCache += summary.CacheTokens()
-				report.TotalCost += summary.Cost
-				report.TotalCostNoCache += summary.CostNoCache
+				profiles = append(profiles, summary)
 			}
 		}
-		sort.Slice(report.Profiles, func(i, j int) bool {
-			return report.Profiles[i].Cost > report.Profiles[j].Cost
+		sort.Slice(profiles, func(i, j int) bool {
+			return profiles[i].Cost > profiles[j].Cost
 		})
 	} else {
 		dbPath := m.allProfiles[currentProfile]
 		summary, err := m.reader.BuildProfileSummary(currentProfile, dbPath, currentMonth, 0)
 		if err == nil && summary != nil {
-			report.Profiles = append(report.Profiles, summary)
-			report.TotalRequests = summary.Requests
-			report.TotalInput = summary.InputTokens
-			report.TotalOutput = summary.OutputTokens
-			report.TotalCache = summary.CacheTokens()
-			report.TotalCost = summary.Cost
-			report.TotalCostNoCache = summary.CostNoCache
+			profiles = append(profiles, summary)
 		}
 	}
 
-	savedDollars := report.TotalCostNoCache - report.TotalCost
-	if savedDollars < 0 {
-		savedDollars = 0
-	}
-	savingsPct := 0.0
-	if report.TotalCostNoCache > 0 {
-		savingsPct = (savedDollars / report.TotalCostNoCache) * 100.0
-	}
-	report.TotalSavings = model.CacheSavings{
-		NetSpend:         report.TotalCost,
-		EstimatedNoCache: report.TotalCostNoCache,
-		DollarsSaved:     savedDollars,
-		SavingsPct:       savingsPct,
-	}
-
-	m.report = report
+	m.report = model.NewMultiProfileReport(currentMonth, profiles)
 	m.scrollOffset = 0
 }
 
@@ -314,6 +285,10 @@ func (m *InteractiveModel) View() string {
 	case tabModels:
 		if currentProfile == "all" {
 			content.WriteString(renderProfilesSummaryTable(m.report.Profiles, m.report.TotalCost, w))
+			if len(m.report.Providers) > 0 {
+				content.WriteString("\n\n" + StyleBold.Render("Provider Summary — All Profiles") + "\n")
+				content.WriteString(renderProviderSummaryTable(m.report.Providers))
+			}
 			content.WriteString("\n")
 			for _, p := range m.report.Profiles {
 				if p.Requests > 0 {

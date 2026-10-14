@@ -2,24 +2,25 @@ package model
 
 import (
 	"fmt"
+	"sort"
 	"time"
 )
 
 // ModelCost holds aggregated usage statistics for a specific provider and model.
 type ModelCost struct {
-	Provider        string  `json:"provider"`
-	Model           string  `json:"model"`
-	Requests        int64   `json:"requests"`
-	InputTokens     int64   `json:"input_tokens"`
-	OutputTokens    int64   `json:"output_tokens"`
-	CacheReadTokens int64   `json:"cache_read_tokens"`
-	CacheWriteTokens int64  `json:"cache_write_tokens"`
-	TotalTokens     int64   `json:"total_tokens"`
-	Cost            float64 `json:"cost"`
-	CostNoCache     float64 `json:"cost_no_cache"`
-	AvgDurationMs   float64 `json:"avg_duration_ms"`
-	AvgTtftMs       float64 `json:"avg_ttft_ms"`
-	SharePct        float64 `json:"share_pct"`
+	Provider         string  `json:"provider"`
+	Model            string  `json:"model"`
+	Requests         int64   `json:"requests"`
+	InputTokens      int64   `json:"input_tokens"`
+	OutputTokens     int64   `json:"output_tokens"`
+	CacheReadTokens  int64   `json:"cache_read_tokens"`
+	CacheWriteTokens int64   `json:"cache_write_tokens"`
+	TotalTokens      int64   `json:"total_tokens"`
+	Cost             float64 `json:"cost"`
+	CostNoCache      float64 `json:"cost_no_cache"`
+	AvgDurationMs    float64 `json:"avg_duration_ms"`
+	AvgTtftMs        float64 `json:"avg_ttft_ms"`
+	SharePct         float64 `json:"share_pct"`
 }
 
 func (m ModelCost) CacheTokens() int64 {
@@ -47,16 +48,16 @@ func (m ModelCost) TokensPerSec() float64 {
 
 // ProviderSubtotal represents aggregated metrics for all models under one provider.
 type ProviderSubtotal struct {
-	Provider        string       `json:"provider"`
-	Models          []*ModelCost `json:"models"`
-	Requests        int64        `json:"requests"`
-	InputTokens     int64        `json:"input_tokens"`
-	OutputTokens    int64        `json:"output_tokens"`
-	CacheReadTokens int64        `json:"cache_read_tokens"`
-	CacheWriteTokens int64       `json:"cache_write_tokens"`
-	Cost            float64      `json:"cost"`
-	CostNoCache     float64      `json:"cost_no_cache"`
-	SharePct        float64      `json:"share_pct"`
+	Provider         string       `json:"provider"`
+	Models           []*ModelCost `json:"models,omitempty"`
+	Requests         int64        `json:"requests"`
+	InputTokens      int64        `json:"input_tokens"`
+	OutputTokens     int64        `json:"output_tokens"`
+	CacheReadTokens  int64        `json:"cache_read_tokens"`
+	CacheWriteTokens int64        `json:"cache_write_tokens"`
+	Cost             float64      `json:"cost"`
+	CostNoCache      float64      `json:"cost_no_cache"`
+	SharePct         float64      `json:"share_pct"`
 }
 
 func (p ProviderSubtotal) CacheTokens() int64 {
@@ -73,15 +74,15 @@ func (p ProviderSubtotal) CacheHitRate() float64 {
 
 // ProjectCost holds attribution data per repository or workspace folder.
 type ProjectCost struct {
-	Folder          string  `json:"folder"`
-	DisplayName     string  `json:"display_name"`
-	Requests        int64   `json:"requests"`
-	InputTokens     int64   `json:"input_tokens"`
-	OutputTokens    int64   `json:"output_tokens"`
-	CacheTokens     int64   `json:"cache_tokens"`
-	Cost            float64 `json:"cost"`
-	TopModel        string  `json:"top_model"`
-	SharePct        float64 `json:"share_pct"`
+	Folder       string  `json:"folder"`
+	DisplayName  string  `json:"display_name"`
+	Requests     int64   `json:"requests"`
+	InputTokens  int64   `json:"input_tokens"`
+	OutputTokens int64   `json:"output_tokens"`
+	CacheTokens  int64   `json:"cache_tokens"`
+	Cost         float64 `json:"cost"`
+	TopModel     string  `json:"top_model"`
+	SharePct     float64 `json:"share_pct"`
 }
 
 // AgentTypeCost holds attribution data for main orchestrator vs subagents vs advisor.
@@ -149,45 +150,45 @@ func (w WeeklyCost) CacheHitRate() float64 {
 
 // CacheSavings calculates the dollar value saved via prompt caching.
 type CacheSavings struct {
-	NetSpend        float64 `json:"net_spend"`
+	NetSpend         float64 `json:"net_spend"`
 	EstimatedNoCache float64 `json:"estimated_no_cache"`
-	DollarsSaved    float64 `json:"dollars_saved"`
-	SavingsPct      float64 `json:"savings_pct"`
+	DollarsSaved     float64 `json:"dollars_saved"`
+	SavingsPct       float64 `json:"savings_pct"`
 }
 
 // BurnRateForecast calculates daily run-rate and month-end projection.
 type BurnRateForecast struct {
-	Month           string    `json:"month"`
-	ActiveDays      int       `json:"active_days"`
-	TotalDaysInMonth int      `json:"total_days_in_month"`
-	CurrentSpend    float64   `json:"current_spend"`
-	DailyBurnRate   float64   `json:"daily_burn_rate"`
-	ProjectedSpend  float64   `json:"projected_spend"`
-	BudgetCap       float64   `json:"budget_cap,omitempty"`
-	OverBudget      bool      `json:"over_budget"`
+	Month            string  `json:"month"`
+	ActiveDays       int     `json:"active_days"`
+	TotalDaysInMonth int     `json:"total_days_in_month"`
+	CurrentSpend     float64 `json:"current_spend"`
+	DailyBurnRate    float64 `json:"daily_burn_rate"`
+	ProjectedSpend   float64 `json:"projected_spend"`
+	BudgetCap        float64 `json:"budget_cap,omitempty"`
+	OverBudget       bool    `json:"over_budget"`
 }
 
 // ProfileSummary represents high-level metrics for a profile in a given month.
 type ProfileSummary struct {
-	Profile         string              `json:"profile"`
-	Month           string              `json:"month"`
-	Requests        int64               `json:"requests"`
-	InputTokens     int64               `json:"input_tokens"`
-	OutputTokens    int64               `json:"output_tokens"`
-	CacheReadTokens int64               `json:"cache_read_tokens"`
-	CacheWriteTokens int64              `json:"cache_write_tokens"`
-	TotalTokens     int64               `json:"total_tokens"`
-	Cost            float64             `json:"cost"`
-	CostNoCache     float64             `json:"cost_no_cache"`
-	MinTimestamp    int64               `json:"min_timestamp"`
-	MaxTimestamp    int64               `json:"max_timestamp"`
-	Providers       []*ProviderSubtotal `json:"providers,omitempty"`
-	Projects        []*ProjectCost      `json:"projects,omitempty"`
-	AgentTypes      []*AgentTypeCost    `json:"agent_types,omitempty"`
-	Days            []*DailyCost        `json:"days,omitempty"`
-	Weeks           []*WeeklyCost       `json:"weeks,omitempty"`
-	Savings         CacheSavings        `json:"savings"`
-	Forecast        BurnRateForecast    `json:"forecast"`
+	Profile          string              `json:"profile"`
+	Month            string              `json:"month"`
+	Requests         int64               `json:"requests"`
+	InputTokens      int64               `json:"input_tokens"`
+	OutputTokens     int64               `json:"output_tokens"`
+	CacheReadTokens  int64               `json:"cache_read_tokens"`
+	CacheWriteTokens int64               `json:"cache_write_tokens"`
+	TotalTokens      int64               `json:"total_tokens"`
+	Cost             float64             `json:"cost"`
+	CostNoCache      float64             `json:"cost_no_cache"`
+	MinTimestamp     int64               `json:"min_timestamp"`
+	MaxTimestamp     int64               `json:"max_timestamp"`
+	Providers        []*ProviderSubtotal `json:"providers,omitempty"`
+	Projects         []*ProjectCost      `json:"projects,omitempty"`
+	AgentTypes       []*AgentTypeCost    `json:"agent_types,omitempty"`
+	Days             []*DailyCost        `json:"days,omitempty"`
+	Weeks            []*WeeklyCost       `json:"weeks,omitempty"`
+	Savings          CacheSavings        `json:"savings"`
+	Forecast         BurnRateForecast    `json:"forecast"`
 }
 
 func (s ProfileSummary) CacheTokens() int64 {
@@ -213,16 +214,71 @@ func (s ProfileSummary) DateRangeString() string {
 
 // MultiProfileReport combines summaries of multiple profiles.
 type MultiProfileReport struct {
-	Month           string            `json:"month"`
-	Profiles        []*ProfileSummary `json:"profiles"`
-	TotalRequests   int64             `json:"total_requests"`
-	TotalInput      int64             `json:"total_input_tokens"`
-	TotalOutput     int64             `json:"total_output_tokens"`
-	TotalCache      int64             `json:"total_cache_tokens"`
-	TotalCost       float64           `json:"total_cost"`
-	TotalCostNoCache float64          `json:"total_cost_no_cache"`
-	TotalSavings    CacheSavings      `json:"total_savings"`
-	CombinedForecast BurnRateForecast `json:"combined_forecast"`
+	Month            string              `json:"month"`
+	Profiles         []*ProfileSummary   `json:"profiles"`
+	Providers        []*ProviderSubtotal `json:"providers,omitempty"`
+	TotalRequests    int64               `json:"total_requests"`
+	TotalInput       int64               `json:"total_input_tokens"`
+	TotalOutput      int64               `json:"total_output_tokens"`
+	TotalCache       int64               `json:"total_cache_tokens"`
+	TotalCost        float64             `json:"total_cost"`
+	TotalCostNoCache float64             `json:"total_cost_no_cache"`
+	TotalSavings     CacheSavings        `json:"total_savings"`
+	CombinedForecast BurnRateForecast    `json:"combined_forecast"`
+}
+
+// NewMultiProfileReport aggregates selected profiles without modifying their subtotals.
+// Combined providers contain totals only; model detail stays under each profile.
+func NewMultiProfileReport(month string, profiles []*ProfileSummary) *MultiProfileReport {
+	report := &MultiProfileReport{Month: month, Profiles: profiles}
+	providers := make(map[string]*ProviderSubtotal)
+	for _, profile := range profiles {
+		report.TotalRequests += profile.Requests
+		report.TotalInput += profile.InputTokens
+		report.TotalOutput += profile.OutputTokens
+		report.TotalCache += profile.CacheTokens()
+		report.TotalCost += profile.Cost
+		report.TotalCostNoCache += profile.CostNoCache
+		for _, subtotal := range profile.Providers {
+			total := providers[subtotal.Provider]
+			if total == nil {
+				total = &ProviderSubtotal{Provider: subtotal.Provider}
+				providers[subtotal.Provider] = total
+				report.Providers = append(report.Providers, total)
+			}
+			total.Requests += subtotal.Requests
+			total.InputTokens += subtotal.InputTokens
+			total.OutputTokens += subtotal.OutputTokens
+			total.CacheReadTokens += subtotal.CacheReadTokens
+			total.CacheWriteTokens += subtotal.CacheWriteTokens
+			total.Cost += subtotal.Cost
+			total.CostNoCache += subtotal.CostNoCache
+		}
+	}
+	for _, provider := range report.Providers {
+		if report.TotalCost > 0 {
+			provider.SharePct = provider.Cost / report.TotalCost * 100
+		}
+	}
+	sort.Slice(report.Providers, func(i, j int) bool {
+		if report.Providers[i].Cost == report.Providers[j].Cost {
+			return report.Providers[i].Provider < report.Providers[j].Provider
+		}
+		return report.Providers[i].Cost > report.Providers[j].Cost
+	})
+	saved := report.TotalCostNoCache - report.TotalCost
+	if saved < 0 {
+		saved = 0
+	}
+	report.TotalSavings = CacheSavings{
+		NetSpend:         report.TotalCost,
+		EstimatedNoCache: report.TotalCostNoCache,
+		DollarsSaved:     saved,
+	}
+	if report.TotalCostNoCache > 0 {
+		report.TotalSavings.SavingsPct = saved / report.TotalCostNoCache * 100
+	}
+	return report
 }
 
 func (m MultiProfileReport) OverallCacheHitRate() float64 {

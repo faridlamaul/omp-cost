@@ -19,6 +19,7 @@ Built with **Go**, **Lipgloss**, **Cobra**, and **pure Go SQLite** (`modernc.org
 - **Multi-Profile Aggregation:** Automatically detects all Oh My Pi profiles (`work`, `personal`, `default`, etc.) and displays a consolidated overview table alongside per-profile breakdowns.
 - **True Calendar Month Filtering:** View costs by calendar month (e.g. `2026-09` from Sep 1 to current day, or full historical months like `2026-08`), replacing standard 30-day rolling windows.
 - **Provider Subtotals:** Clear subtotals for each provider (`Anthropic`, `OpenAI Codex`, `Google Antigravity`, etc.) with model sorting by spend.
+- **Cross-Profile Provider Totals:** The multi-profile overview includes a **Provider Summary** combining requests, input/output tokens, cache tokens, cost, and spend share across profiles for the selected period. Providers are sorted by cost, with alphabetical ordering for ties; distinct IDs such as `openai` and `openai-codex` remain separate. Per-profile subtotals are preserved.
 - **💰 Prompt Cache ROI Calculator (`--savings`):** Automatically computes dollar value saved via prompt caching and effective discount rate.
 - **📁 Workspace / Project Attribution (`--by-project`):** Groups token usage and costs by repository or folder (e.g. `backend-api`, `frontend-web`, `infra-k8s`).
 - **🤖 Agent Architecture Attribution (`--by-agent`):** Breaks down spending across the Main Orchestrator, Parallel Subagents, and Background Advisors.
@@ -158,6 +159,8 @@ Launch an interactive, keyboard-driven full-screen TUI dashboard powered by **Bu
 omp-cost -i
 ```
 
+With profile `all`, the **Models** tab shows the combined **Provider Summary** between the profile overview and the detailed per-profile tables. Switching months or reloading refreshes the provider totals with the rest of the report.
+
 | Key | Action |
 |---|---|
 | `◀` / `▶` or `h` / `l` | Navigate between previous/next calendar months |
@@ -176,12 +179,17 @@ omp-cost -i
 omp-cost -o json
 omp-cost work 2026-09 --json | jq '.profiles[0].providers[]'
 
+# Combined provider totals across all profiles for a selected month
+omp-cost all 2026-09 --json | jq '.providers[]'
+
 # CSV export (spreadsheet friendly)
 omp-cost -o csv > usage_report.csv
 
 # Markdown table (ready to paste into GitHub PRs / Issues / Slack)
 omp-cost -o md
 ```
+
+JSON exposes combined provider totals in top-level `providers` and retains per-profile model details under `profiles[].providers[]`. Markdown also includes a **Provider Summary** section. CSV remains model-level (or daily/weekly with those flags), without extra subtotal rows, so spreadsheet sums do not double-count costs. `all` month history emits a separate report and provider summary for each month, not one lifetime total.
 
 ---
 
