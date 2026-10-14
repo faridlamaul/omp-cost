@@ -258,9 +258,7 @@ func handleAllProfiles(reader *db.Reader, allProfiles map[string]string, month s
 }
 
 func buildMultiReport(reader *db.Reader, allProfiles map[string]string, profileNames []string, month string, budgetCap float64) *model.MultiProfileReport {
-	report := &model.MultiProfileReport{
-		Month: month,
-	}
+	var profiles []*model.ProfileSummary
 
 	for _, name := range profileNames {
 		dbPath := allProfiles[name]
@@ -271,35 +269,15 @@ func buildMultiReport(reader *db.Reader, allProfiles map[string]string, profileN
 				Month:   month,
 			}
 		}
-		report.Profiles = append(report.Profiles, summary)
-		report.TotalRequests += summary.Requests
-		report.TotalInput += summary.InputTokens
-		report.TotalOutput += summary.OutputTokens
-		report.TotalCache += summary.CacheTokens()
-		report.TotalCost += summary.Cost
-		report.TotalCostNoCache += summary.CostNoCache
+		profiles = append(profiles, summary)
 	}
 
 	// Sort profiles by spend descending
-	sort.Slice(report.Profiles, func(i, j int) bool {
-		return report.Profiles[i].Cost > report.Profiles[j].Cost
+	sort.Slice(profiles, func(i, j int) bool {
+		return profiles[i].Cost > profiles[j].Cost
 	})
 
-	// Combined savings
-	savedDollars := report.TotalCostNoCache - report.TotalCost
-	if savedDollars < 0 {
-		savedDollars = 0
-	}
-	savingsPct := 0.0
-	if report.TotalCostNoCache > 0 {
-		savingsPct = (savedDollars / report.TotalCostNoCache) * 100.0
-	}
-	report.TotalSavings = model.CacheSavings{
-		NetSpend:         report.TotalCost,
-		EstimatedNoCache: report.TotalCostNoCache,
-		DollarsSaved:     savedDollars,
-		SavingsPct:       savingsPct,
-	}
+	report := model.NewMultiProfileReport(month, profiles)
 
 	// Combined Forecast
 	report.CombinedForecast = calculateCombinedForecast(month, report.TotalCost, budgetCap)
@@ -358,10 +336,7 @@ func handleSingleProfile(reader *db.Reader, allProfiles map[string]string, profi
 			if err != nil {
 				continue
 			}
-			report := &model.MultiProfileReport{
-				Month:    m,
-				Profiles: []*model.ProfileSummary{summary},
-			}
+			report := model.NewMultiProfileReport(m, []*model.ProfileSummary{summary})
 			if err := outputReport(report, outputFmt, flags); err != nil {
 				return err
 			}
@@ -378,10 +353,7 @@ func handleSingleProfile(reader *db.Reader, allProfiles map[string]string, profi
 		return nil
 	}
 
-	report := &model.MultiProfileReport{
-		Month:    month,
-		Profiles: []*model.ProfileSummary{summary},
-	}
+	report := model.NewMultiProfileReport(month, []*model.ProfileSummary{summary})
 	return outputReport(report, outputFmt, flags)
 }
 

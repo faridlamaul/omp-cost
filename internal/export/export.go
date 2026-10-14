@@ -169,6 +169,24 @@ func ToMarkdown(report *model.MultiProfileReport) string {
 		ui.FormatCost(report.TotalCost),
 	))
 
+	if len(report.Providers) > 0 {
+		b.WriteString("## Provider Summary\n\n")
+		b.WriteString("| Provider | Requests | In/Out Tokens | Cache Tokens | Cost (USD) | Share |\n")
+		b.WriteString("|:---|---:|---:|---:|---:|---:|\n")
+		for _, provider := range report.Providers {
+			b.WriteString(fmt.Sprintf("| **%s** | %s | %s/%s | %s | %s | %.1f%% |\n",
+				provider.Provider,
+				formatInt(provider.Requests),
+				ui.FormatTokens(provider.InputTokens),
+				ui.FormatTokens(provider.OutputTokens),
+				ui.FormatTokens(provider.CacheTokens()),
+				ui.FormatCost(provider.Cost),
+				provider.SharePct,
+			))
+		}
+		b.WriteString("\n")
+	}
+
 	// Detailed Model breakdown
 	b.WriteString("## Detailed Model Breakdown\n\n")
 	b.WriteString("| Profile | Provider | Model | Requests | In/Out Tokens | Cache Hit | Cost (USD) |\n")

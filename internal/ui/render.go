@@ -62,6 +62,10 @@ func RenderMultiProfileReport(report *model.MultiProfileReport, flags RenderFlag
 
 	// 4. Profiles Overview Table
 	fmt.Println(renderProfilesSummaryTable(report.Profiles, report.TotalCost, w))
+	if len(report.Providers) > 0 {
+		fmt.Println("\n" + StyleBold.Render("Provider Summary — All Profiles"))
+		fmt.Println(renderProviderSummaryTable(report.Providers))
+	}
 
 	// 5. Active Profile Details
 	for _, p := range report.Profiles {
@@ -179,7 +183,7 @@ func RenderSavingsBanner(savings model.CacheSavings, width int) {
 	box := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(ColorGreen).
-		Width(width - 2).
+		Width(width-2).
 		Padding(0, 1).
 		Render(text)
 	fmt.Println(box)
@@ -209,7 +213,7 @@ func RenderForecastBanner(f model.BurnRateForecast, width int) {
 	box := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(statusColor).
-		Width(width - 2).
+		Width(width-2).
 		Padding(0, 1).
 		Render(text)
 	fmt.Println(box)
@@ -309,6 +313,46 @@ func renderProfilesSummaryTable(profiles []*model.ProfileSummary, grandTotal flo
 	b.WriteString("\n")
 	b.WriteString(renderTableBorder("└", "┴", "┘", cols))
 
+	return b.String()
+}
+
+// renderProviderSummaryTable shows provider totals across the selected profiles.
+func renderProviderSummaryTable(providers []*model.ProviderSubtotal) string {
+	var b strings.Builder
+	cols := []struct {
+		name  string
+		width int
+		align lipgloss.Position
+	}{
+		{"Provider", 24, lipgloss.Left},
+		{"Requests", 11, lipgloss.Right},
+		{"In / Out Tokens", 18, lipgloss.Right},
+		{"Cache Tokens", 13, lipgloss.Right},
+		{"Cost ($)", 14, lipgloss.Right},
+		{"Share", 18, lipgloss.Right},
+	}
+	b.WriteString(renderTableBorder("┌", "┬", "┐", cols) + "\n")
+	cells := make([]string, len(cols))
+	for i, c := range cols {
+		cells[i] = lipgloss.NewStyle().Width(c.width).Align(c.align).Render(StyleTableHeader.Render(c.name))
+	}
+	b.WriteString(renderTableRow(cells) + "\n")
+	b.WriteString(renderTableBorder("├", "┼", "┤", cols) + "\n")
+	for _, provider := range providers {
+		values := []string{
+			StyleProvider.Render(truncate(provider.Provider, cols[0].width)),
+			formatInt(provider.Requests),
+			FormatTokens(provider.InputTokens) + "/" + FormatTokens(provider.OutputTokens),
+			FormatTokens(provider.CacheTokens()),
+			StyleCost.Render(FormatCost(provider.Cost)),
+			fmt.Sprintf("%s %4.1f%%", MakeProgressBar(provider.SharePct, 6), provider.SharePct),
+		}
+		for i, c := range cols {
+			cells[i] = lipgloss.NewStyle().Width(c.width).Align(c.align).Render(values[i])
+		}
+		b.WriteString(renderTableRow(cells) + "\n")
+	}
+	b.WriteString(renderTableBorder("└", "┴", "┘", cols))
 	return b.String()
 }
 
