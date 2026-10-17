@@ -238,6 +238,19 @@ omp-cost/
 
 ---
 
+## 🔖 Releases
+
+Releases are automatic. Pull requests are squash-merged, and the PR title becomes the commit that [shiptag](https://github.com/faridlamaul/shiptag) reads, so it must be a [Conventional Commit](https://www.conventionalcommits.org/) (checked by the `PR title` workflow). Every push to `main` runs CI, then tags the next version and attaches the GoReleaser binaries:
+
+| PR title | Release |
+|---|---|
+| `feat(reports): …` | minor (`v0.3.0`) |
+| `fix(sync): …`, `perf: …` | patch (`v0.2.1`) |
+| `feat!: …` or a `BREAKING CHANGE:` footer | minor while `0.x`, major from `1.0.0` |
+| `docs: …`, `ci: …`, `chore: …`, `test: …`, `refactor: …` | none |
+
+---
+
 ## 📄 License
 
 MIT License © 2026 Ahmad Lamaul Farid.

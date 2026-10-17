@@ -1,40 +1,40 @@
 name: Release
 
+# Every push to main runs CI, then shiptag (through ci-template) derives the
+# next version from the Conventional Commits since the last tag. Commits that
+# warrant no release (docs, ci, chore, ...) tag nothing and build nothing.
+# Everything runs in one workflow because tags created with GITHUB_TOKEN do not
+# trigger other workflows.
 on:
-  workflow_dispatch:
-    inputs:
-      bump:
-        description: "Version bump type"
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
-          - auto
-        default: patch
-        required: true
-      dry_run:
-        description: "Dry-run (preview version without creating tag or release)"
-        type: boolean
-        default: false
+  push:
+    branches: [main]
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
-  # 1. Semantic Versioning, Tagging, and Release Notes via shiptag
+  ci:
+    uses: ./.github/workflows/ci.yml
+
   semantic:
+    needs: ci
+    permissions:
+      contents: write
     uses: faridlamaul/ci-template/.github/workflows/semantic-release.yml@main
     with:
-      bump: ${{ inputs.bump }}
-      dry_run: ${{ inputs.dry_run }}
+      bump: auto
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
 
-  # 2. Multi-platform Binary Compilation & Asset Upload via GoReleaser
   binary:
     needs: semantic
-    if: needs.semantic.outputs.released == 'true' && !inputs.dry_run
+    if: needs.semantic.outputs.released == 'true'
+    permissions:
+      contents: write
     uses: faridlamaul/ci-template/.github/workflows/go-release.yml@main
     with:
       version: ${{ needs.semantic.outputs.version }}
