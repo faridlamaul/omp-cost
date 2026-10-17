@@ -22,9 +22,9 @@ permissions:
   contents: write
 
 jobs:
-  # 1. Semantic Versioning, Tagging, and Release Notes via go-gitops
+  # 1. Semantic Versioning, Tagging, and Release Notes via shiptag
   semantic:
-    uses: faridlamaul/ci-template/.github/workflows/semantic-release.yml@main
+    uses: faridlamaul/ci-template/.github/workflows/semantic-release.yml@fix/shiptag-semantic-release
     with:
       bump: ${{ inputs.bump }}
       dry_run: ${{ inputs.dry_run }}
