@@ -24,7 +24,7 @@ jobs:
     needs: ci
     permissions:
       contents: write
-    uses: faridlamaul/ci-template/.github/workflows/semantic-release.yml@main
+    uses: faridlamaul/ci-template/.github/workflows/semantic-release.yml@77397896441e82e3355760558f33b17fff605805 # v1.0.0
     with:
       bump: auto
     secrets:
@@ -35,7 +35,7 @@ jobs:
     if: needs.semantic.outputs.released == 'true'
     permissions:
       contents: write
-    uses: faridlamaul/ci-template/.github/workflows/go-release.yml@main
+    uses: faridlamaul/ci-template/.github/workflows/go-release.yml@77397896441e82e3355760558f33b17fff605805 # v1.0.0
     with:
       version: ${{ needs.semantic.outputs.version }}
     secrets:
