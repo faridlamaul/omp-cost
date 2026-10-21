@@ -114,7 +114,7 @@ func (r *Reader) GetDistinctMonths(dbPath string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	query := `
 	SELECT DISTINCT strftime('%Y-%m', timestamp/1000, 'unixepoch', 'localtime') as m
@@ -126,7 +126,7 @@ func (r *Reader) GetDistinctMonths(dbPath string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var months []string
 	for rows.Next() {
@@ -144,7 +144,7 @@ func (r *Reader) GetModelCosts(dbPath string, month string) ([]*model.ModelCost,
 	if err != nil {
 		return nil, 0, 0, err
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	whereClause := ""
 	var args []interface{}
@@ -183,7 +183,7 @@ func (r *Reader) GetModelCosts(dbPath string, month string) ([]*model.ModelCost,
 	if err != nil {
 		return nil, 0, 0, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var results []*model.ModelCost
 	var minTsAll int64 = 0
@@ -229,7 +229,7 @@ func (r *Reader) GetProjectCosts(dbPath string, month string) ([]*model.ProjectC
 	if err != nil {
 		return nil, err
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	whereClause := ""
 	var args []interface{}
@@ -256,7 +256,7 @@ func (r *Reader) GetProjectCosts(dbPath string, month string) ([]*model.ProjectC
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var projects []*model.ProjectCost
 	for rows.Next() {
@@ -284,7 +284,7 @@ func (r *Reader) GetAgentTypeCosts(dbPath string, month string) ([]*model.AgentT
 	if err != nil {
 		return nil, err
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	whereClause := ""
 	var args []interface{}
@@ -311,7 +311,7 @@ func (r *Reader) GetAgentTypeCosts(dbPath string, month string) ([]*model.AgentT
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var agentTypes []*model.AgentTypeCost
 	for rows.Next() {
@@ -331,7 +331,7 @@ func (r *Reader) GetDailyCosts(dbPath string, month string) ([]*model.DailyCost,
 	if err != nil {
 		return nil, err
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	whereClause := ""
 	var args []interface{}
@@ -360,7 +360,7 @@ func (r *Reader) GetDailyCosts(dbPath string, month string) ([]*model.DailyCost,
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var days []*model.DailyCost
 	for rows.Next() {
@@ -382,7 +382,7 @@ func (r *Reader) GetWeeklyCosts(dbPath string, month string) ([]*model.WeeklyCos
 	if err != nil {
 		return nil, err
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	whereClause := ""
 	var args []interface{}
@@ -413,7 +413,7 @@ func (r *Reader) GetWeeklyCosts(dbPath string, month string) ([]*model.WeeklyCos
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var weeks []*model.WeeklyCost
 	for rows.Next() {
@@ -471,7 +471,7 @@ func (r *Reader) BuildProfileSummary(profileName, dbPath, month string, budgetCa
 
 	// Group models by provider
 	providerMap := make(map[string]*model.ProviderSubtotal)
-	var grandCost float64 = 0.0
+	grandCost := 0.0
 
 	for _, mc := range modelCosts {
 		summary.Requests += mc.Requests

@@ -292,7 +292,7 @@ func (m *InteractiveModel) View() string {
 			content.WriteString("\n")
 			for _, p := range m.report.Profiles {
 				if p.Requests > 0 {
-					content.WriteString(fmt.Sprintf("\n%s\n", lipgloss.NewStyle().Bold(true).Foreground(ColorMauve).Render(fmt.Sprintf("▶ Profile: %s (%s)", p.Profile, FormatCost(p.Cost)))))
+					fmt.Fprintf(&content, "\n%s\n", lipgloss.NewStyle().Bold(true).Foreground(ColorMauve).Render(fmt.Sprintf("▶ Profile: %s (%s)", p.Profile, FormatCost(p.Cost))))
 					content.WriteString(renderModelBreakdownTable(p, w))
 				}
 			}
@@ -303,7 +303,7 @@ func (m *InteractiveModel) View() string {
 	case tabDaily:
 		for _, p := range m.report.Profiles {
 			if len(p.Days) > 0 {
-				content.WriteString(fmt.Sprintf("%s (%s)\n", lipgloss.NewStyle().Bold(true).Foreground(ColorSky).Render(fmt.Sprintf("📅 Daily: %s", p.Profile)), FormatCost(p.Cost)))
+				fmt.Fprintf(&content, "%s (%s)\n", lipgloss.NewStyle().Bold(true).Foreground(ColorSky).Render(fmt.Sprintf("📅 Daily: %s", p.Profile)), FormatCost(p.Cost))
 				var dayLines strings.Builder
 				cols := []struct {
 					name  string
@@ -357,7 +357,7 @@ func (m *InteractiveModel) View() string {
 	case tabWeekly:
 		for _, p := range m.report.Profiles {
 			if len(p.Weeks) > 0 {
-				content.WriteString(fmt.Sprintf("%s (%s)\n", lipgloss.NewStyle().Bold(true).Foreground(ColorPeach).Render(fmt.Sprintf("📆 Weekly: %s", p.Profile)), FormatCost(p.Cost)))
+				fmt.Fprintf(&content, "%s (%s)\n", lipgloss.NewStyle().Bold(true).Foreground(ColorPeach).Render(fmt.Sprintf("📆 Weekly: %s", p.Profile)), FormatCost(p.Cost))
 				var wkLines strings.Builder
 				cols := []struct {
 					name  string
@@ -411,7 +411,7 @@ func (m *InteractiveModel) View() string {
 	case tabProjects:
 		for _, p := range m.report.Profiles {
 			if len(p.Projects) > 0 {
-				content.WriteString(fmt.Sprintf("%s\n", lipgloss.NewStyle().Bold(true).Foreground(ColorSky).Render(fmt.Sprintf("📁 Projects: %s", p.Profile))))
+				fmt.Fprintf(&content, "%s\n", lipgloss.NewStyle().Bold(true).Foreground(ColorSky).Render(fmt.Sprintf("📁 Projects: %s", p.Profile)))
 				var prjLines strings.Builder
 				cols := []struct {
 					name  string
@@ -460,7 +460,7 @@ func (m *InteractiveModel) View() string {
 				models = append(models, prov.Models...)
 			}
 			if len(models) > 0 {
-				content.WriteString(fmt.Sprintf("%s\n", lipgloss.NewStyle().Bold(true).Foreground(ColorYellow).Render(fmt.Sprintf("⚡ Performance: %s", p.Profile))))
+				fmt.Fprintf(&content, "%s\n", lipgloss.NewStyle().Bold(true).Foreground(ColorYellow).Render(fmt.Sprintf("⚡ Performance: %s", p.Profile)))
 				var perfLines strings.Builder
 				cols := []struct {
 					name  string

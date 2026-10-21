@@ -7,15 +7,8 @@ import (
 )
 
 func TestDiscoverProfiles(t *testing.T) {
-	tmpHome, err := os.MkdirTemp("", "omp-test-*")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(tmpHome)
-
-	origHome := os.Getenv("HOME")
-	os.Setenv("HOME", tmpHome)
-	defer os.Setenv("HOME", origHome)
+	tmpHome := t.TempDir()
+	t.Setenv("HOME", tmpHome)
 
 	reader := NewReader()
 

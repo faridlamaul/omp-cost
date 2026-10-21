@@ -138,7 +138,7 @@ func ToWeeklyCSV(profiles []*model.ProfileSummary) (string, error) {
 func ToMarkdown(report *model.MultiProfileReport) string {
 	var b strings.Builder
 
-	b.WriteString(fmt.Sprintf("# ⚡ Oh My Pi Usage & Cost Report — %s\n\n", report.Month))
+	fmt.Fprintf(&b, "# ⚡ Oh My Pi Usage & Cost Report — %s\n\n", report.Month)
 
 	// Overview Section
 	b.WriteString("## Profiles Summary\n\n")
@@ -152,29 +152,29 @@ func ToMarkdown(report *model.MultiProfileReport) string {
 			share = (p.Cost / report.TotalCost) * 100.0
 		}
 		inOut := fmt.Sprintf("%s/%s", ui.FormatTokens(p.InputTokens), ui.FormatTokens(p.OutputTokens))
-		b.WriteString(fmt.Sprintf("| **%s** | %s | %s | %s | %s | %.1f%% |\n",
+		fmt.Fprintf(&b, "| **%s** | %s | %s | %s | %s | %.1f%% |\n",
 			p.Profile,
 			formatInt(p.Requests),
 			inOut,
 			ui.FormatTokens(cTokens),
 			ui.FormatCost(p.Cost),
 			share,
-		))
+		)
 	}
-	b.WriteString(fmt.Sprintf("| **TOTAL** | **%s** | **%s/%s** | **%s** | **%s** | **100.0%%** |\n\n",
+	fmt.Fprintf(&b, "| **TOTAL** | **%s** | **%s/%s** | **%s** | **%s** | **100.0%%** |\n\n",
 		formatInt(report.TotalRequests),
 		ui.FormatTokens(report.TotalInput),
 		ui.FormatTokens(report.TotalOutput),
 		ui.FormatTokens(report.TotalCache),
 		ui.FormatCost(report.TotalCost),
-	))
+	)
 
 	if len(report.Providers) > 0 {
 		b.WriteString("## Provider Summary\n\n")
 		b.WriteString("| Provider | Requests | In/Out Tokens | Cache Tokens | Cost (USD) | Share |\n")
 		b.WriteString("|:---|---:|---:|---:|---:|---:|\n")
 		for _, provider := range report.Providers {
-			b.WriteString(fmt.Sprintf("| **%s** | %s | %s/%s | %s | %s | %.1f%% |\n",
+			fmt.Fprintf(&b, "| **%s** | %s | %s/%s | %s | %s | %.1f%% |\n",
 				provider.Provider,
 				formatInt(provider.Requests),
 				ui.FormatTokens(provider.InputTokens),
@@ -182,7 +182,7 @@ func ToMarkdown(report *model.MultiProfileReport) string {
 				ui.FormatTokens(provider.CacheTokens()),
 				ui.FormatCost(provider.Cost),
 				provider.SharePct,
-			))
+			)
 		}
 		b.WriteString("\n")
 	}
@@ -196,7 +196,7 @@ func ToMarkdown(report *model.MultiProfileReport) string {
 		for _, prov := range p.Providers {
 			for _, m := range prov.Models {
 				inOut := fmt.Sprintf("%s/%s", ui.FormatTokens(m.InputTokens), ui.FormatTokens(m.OutputTokens))
-				b.WriteString(fmt.Sprintf("| **%s** | %s | `%s` | %s | %s | %.1f%% | %s |\n",
+				fmt.Fprintf(&b, "| **%s** | %s | `%s` | %s | %s | %.1f%% | %s |\n",
 					p.Profile,
 					m.Provider,
 					m.Model,
@@ -204,7 +204,7 @@ func ToMarkdown(report *model.MultiProfileReport) string {
 					inOut,
 					m.CacheHitRate(),
 					ui.FormatCost(m.Cost),
-				))
+				)
 			}
 		}
 	}
@@ -224,8 +224,8 @@ func ToMarkdown(report *model.MultiProfileReport) string {
 		for _, p := range report.Profiles {
 			for _, d := range p.Days {
 				inOut := fmt.Sprintf("%s/%s", ui.FormatTokens(d.InputTokens), ui.FormatTokens(d.OutputTokens))
-				b.WriteString(fmt.Sprintf("| %s | %s | **%s** | %s | %s | %.1f%% | %s |\n",
-					d.Date, d.DayOfWeek, p.Profile, formatInt(d.Requests), inOut, d.CacheHitRate(), ui.FormatCost(d.Cost)))
+				fmt.Fprintf(&b, "| %s | %s | **%s** | %s | %s | %.1f%% | %s |\n",
+					d.Date, d.DayOfWeek, p.Profile, formatInt(d.Requests), inOut, d.CacheHitRate(), ui.FormatCost(d.Cost))
 			}
 		}
 	}
@@ -245,8 +245,8 @@ func ToMarkdown(report *model.MultiProfileReport) string {
 		for _, p := range report.Profiles {
 			for _, wk := range p.Weeks {
 				inOut := fmt.Sprintf("%s/%s", ui.FormatTokens(wk.InputTokens), ui.FormatTokens(wk.OutputTokens))
-				b.WriteString(fmt.Sprintf("| %s | %s | **%s** | %s | %s | %.1f%% | %s |\n",
-					wk.Week, wk.DateRange, p.Profile, formatInt(wk.Requests), inOut, wk.CacheHitRate(), ui.FormatCost(wk.Cost)))
+				fmt.Fprintf(&b, "| %s | %s | **%s** | %s | %s | %.1f%% | %s |\n",
+					wk.Week, wk.DateRange, p.Profile, formatInt(wk.Requests), inOut, wk.CacheHitRate(), ui.FormatCost(wk.Cost))
 			}
 		}
 	}
