@@ -22,14 +22,27 @@ builds:
 
 archives:
   - id: default
-    format: tar.gz
+    formats: [tar.gz]
     name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}"
     format_overrides:
       - goos: windows
-        format: zip
+        formats: [zip]
 
 checksum:
   name_template: "checksums.txt"
+
+signs:
+  - id: checksums
+    cmd: cosign
+    artifacts: checksum
+    signature: "${artifact}.sigstore.json"
+    args: [sign-blob, "--bundle=${signature}", "${artifact}", "--yes"]
+
+# shiptag creates the release and its notes; GoReleaser adds the archives,
+# checksums.txt and its signature bundle. A re-run replaces them.
+release:
+  mode: keep-existing
+  replace_existing_artifacts: true
 
 changelog:
   sort: asc

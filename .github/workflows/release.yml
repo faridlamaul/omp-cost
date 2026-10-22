@@ -1,10 +1,12 @@
 name: Release
 
-# Every push to main runs CI, then shiptag (through ci-template) derives the
-# next version from the Conventional Commits since the last tag. Commits that
-# warrant no release (docs, ci, chore, ...) tag nothing and build nothing.
-# Everything runs in one workflow because tags created with GITHUB_TOKEN do not
-# trigger other workflows.
+# Every push to main runs CI, then shipguard release: shiptag derives the next
+# version from the Conventional Commits since the last tag, GoReleaser builds
+# the archives and signs checksums.txt (cosign keyless), and the workflow
+# attests the archives with GitHub build provenance. Commits that warrant no
+# release (docs, ci, chore, ...) tag nothing and build nothing. Everything runs
+# in one workflow because tags created with GITHUB_TOKEN do not trigger other
+# workflows.
 on:
   push:
     branches: [main]
@@ -20,23 +22,14 @@ jobs:
   ci:
     uses: ./.github/workflows/ci.yml
 
-  semantic:
+  release:
     needs: ci
     permissions:
       contents: write
-    uses: faridlamaul/ci-template/.github/workflows/semantic-release.yml@77397896441e82e3355760558f33b17fff605805 # v1.0.0
+      packages: write
+      id-token: write
+      attestations: write
+    uses: faridlamaul/shipguard/.github/workflows/release-artifacts.yml@9044e94ed35f6116d99a667cbbfce5f8e7f6ed9d # v1.4.0
     with:
-      bump: auto
-    secrets:
-      token: ${{ secrets.GITHUB_TOKEN }}
-
-  binary:
-    needs: semantic
-    if: needs.semantic.outputs.released == 'true'
-    permissions:
-      contents: write
-    uses: faridlamaul/ci-template/.github/workflows/go-release.yml@77397896441e82e3355760558f33b17fff605805 # v1.0.0
-    with:
-      version: ${{ needs.semantic.outputs.version }}
-    secrets:
-      token: ${{ secrets.GITHUB_TOKEN }}
+      steps: version binaries
+      shipguard-version: v1.4.0
