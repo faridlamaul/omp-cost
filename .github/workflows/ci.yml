@@ -16,6 +16,6 @@ jobs:
     # linters, see .golangci.yml), runs the tests with -race through gotestsum
     # (JUnit and coverage are uploaded as the shipguard-ci artifact) and
     # builds ./... .
-    uses: faridlamaul/shipguard/.github/workflows/build-test.yml@6d32599d46058d7d8545af58b22f227e2fefccde # v1.3.0
+    uses: faridlamaul/shipguard/.github/workflows/build-test.yml@9044e94ed35f6116d99a667cbbfce5f8e7f6ed9d # v1.4.0
     with:
       steps: lint test build
