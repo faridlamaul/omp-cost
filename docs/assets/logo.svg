@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="omp-cost">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#06B6D4"/>
+    </linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="50" fill="url(#g)"/>
+  <circle cx="64" cy="64" r="39" fill="none" stroke="#fff" stroke-width="3.5" stroke-opacity=".45" stroke-dasharray="6 5"/>
+  <path d="M71 26L42 70H61L55 102L86 56H67Z" fill="#fff" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M98 18L101 25L108 28L101 31L98 38L95 31L88 28L95 25Z" fill="#FBBF24"/>
+</svg>
