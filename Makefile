@@ -2,7 +2,7 @@ BINARY_NAME=omp-cost
 INSTALL_DIR=$(HOME)/.local/bin
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 
-.PHONY: all build install test clean
+.PHONY: all build install test vet clean demo
 
 all: build
 
@@ -22,3 +22,6 @@ vet:
 
 clean:
 	rm -rf bin/
+
+demo: build
+	vhs docs/demo/demo.tape
