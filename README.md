@@ -22,7 +22,7 @@
   <img alt="omp-cost showing a profile's monthly cost report, then the interactive dashboard" src="docs/assets/demo.gif" width="800">
 </p>
 
-omp-cost reads the usage that Oh My Pi records in each profile's `stats.db` and reports requests, tokens, prompt-cache hit rate, and cost by calendar month, profile, provider, and model. It also attributes spend to repositories and agent roles, measures latency per model, and forecasts the month-end bill.
+omp-cost reads the usage that Oh My Pi records in each profile's `stats.db`. It reports requests, tokens, prompt-cache hit rate, and cost by calendar month, profile, provider, and model. It also attributes spend to repositories and agent roles, measures latency per model, and forecasts the month-end bill.
 
 - **All profiles at once:** `default` and every profile under `~/.omp/profiles/`, with per-profile detail and a combined provider summary.
 - **Cache ROI:** what you paid, what the same traffic would have cost without prompt caching, and the difference.
@@ -45,6 +45,7 @@ omp-cost reads the usage that Oh My Pi records in each profile's `stats.db` and 
 - [Releases](#releases)
 - [Contributing](#contributing)
 - [Ownership](#ownership)
+- [License](#license)
 
 </details>
 
@@ -183,7 +184,7 @@ omp-cost work --forecast --budget 300
 
 ## Interactive mode
 
-`omp-cost -i` opens a keyboard-driven, full-screen dashboard built with **Bubble Tea**:
+`omp-cost -i` opens a keyboard-driven, full-screen dashboard built with Bubble Tea:
 
 ```bash
 omp-cost -i
@@ -233,13 +234,14 @@ JSON exposes combined provider totals in top-level `providers` and retains per-p
 | `--interactive` | `-i` | Launch interactive full-screen TUI dashboard |
 | `--daily` | `-d` | Show day-by-day cost and token breakdown |
 | `--weekly` | `-w` | Show week-by-week cost and token breakdown |
+| `--by-agent` | | Show cost attribution by agent role: main orchestrator, subagent, advisor |
 | `--by-project` | | Show cost attribution by repository / workspace folder |
 | `--perf` | | Show latency (TTFT, duration) and throughput benchmarks |
 | `--savings` | | Display prompt cache ROI and dollar savings banner |
 | `--forecast` | | Calculate daily burn-rate and projected month-end spend |
 | `--budget <num>`| | Set monthly budget cap threshold for alert |
 | `--sync` | | Force sync session files before querying |
-| `--no-sync` | | Skip session sync for instant query (<20ms) |
+| `--no-sync` | | Skip session sync for an instant query |
 | `--list` | `-l` | List all discovered profiles and their database paths |
 | `--version` | `-v` | Print version information |
 | `--help` | `-h` | Display help guide |
@@ -262,7 +264,7 @@ omp-cost/
 
 ## Releases
 
-Releases are automatic. Pull requests are squash-merged, and the PR title becomes the commit that [shiptag](https://github.com/faridlamaul/shiptag) reads, so it must be a [Conventional Commit](https://www.conventionalcommits.org/) (checked by the `PR title` workflow). Every push to `main` runs CI through shipguard's `build-test.yml` (lint, test, build). Then shipguard's `release-artifacts.yml` tags the next version, publishes the release notes, and attaches the GoReleaser binaries with a signed `checksums.txt`:
+Releases are automatic. Pull requests are squash-merged. The PR title becomes the commit that [shiptag](https://github.com/faridlamaul/shiptag) reads, so it must be a [Conventional Commit](https://www.conventionalcommits.org/) (checked by the `PR title` workflow). Every push to `main` runs CI through shipguard's `build-test.yml` (lint, test, build). Then shipguard's `release-artifacts.yml` tags the next version and publishes the release notes. It also attaches the GoReleaser binaries with a signed `checksums.txt`. The PR title decides the release:
 
 | PR title | Release |
 |---|---|
@@ -283,7 +285,9 @@ make demo    # re-record docs/assets/demo.gif, overview.png and tui.png (needs v
 
 ## Ownership
 
-Maintainer: af/faridlamaul · Repository: <https://github.com/faridlamaul/omp-cost> · Issues: <https://github.com/faridlamaul/omp-cost/issues>
+- **Maintainer:** [af/faridlamaul](https://github.com/faridlamaul)
+- **Repository:** [faridlamaul/omp-cost](https://github.com/faridlamaul/omp-cost)
+- **Issues:** [GitHub Issues](https://github.com/faridlamaul/omp-cost/issues)
 
 ## License
 
