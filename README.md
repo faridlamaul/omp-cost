@@ -44,6 +44,7 @@ omp-cost reads the usage that Oh My Pi records in each profile's `stats.db` and 
 - [Architecture](#architecture)
 - [Releases](#releases)
 - [Contributing](#contributing)
+- [Ownership](#ownership)
 
 </details>
 
@@ -279,6 +280,10 @@ make demo    # re-record docs/assets/demo.gif, overview.png and tui.png (needs v
 ```
 
 `make demo` builds a throwaway `HOME` with made-up usage, so recordings never show your own data.
+
+## Ownership
+
+Maintainer: af/faridlamaul · Repository: <https://github.com/faridlamaul/omp-cost> · Issues: <https://github.com/faridlamaul/omp-cost/issues>
 
 ## License
 
